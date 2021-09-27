@@ -157,6 +157,14 @@ int main()
 
 **-- IN PROGRESS --**
 
+## Compiler Support
+
+|            |                version                |
+| :--------: | :-----------------------------------: |
+|    MSVC    | Visual Studio 2022 Preview 4 or later |
+|    GCC     |   gcc version 12.0.0 (experimental)   |
+| LLVM Clang |                  No                   |
+
 ## Unresolved questions
 
 - N/A
