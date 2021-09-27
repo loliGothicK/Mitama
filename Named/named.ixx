@@ -36,7 +36,7 @@ export namespace mitama {
     //! consistent comparisons
     template <auto T>
     constexpr std::strong_ordering operator<=>(static_string<T>) const noexcept {
-      static_string<S>::value <=> static_string<T>::value;
+      return static_string<S>::value <=> static_string<T>::value;
     }
   };
 
