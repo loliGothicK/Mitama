@@ -165,6 +165,9 @@ export namespace mitama {
       : named_storage<T>{ into.args }
     {}
 
+    decltype(auto) value() &      { return storage::deref(); }
+    decltype(auto) value() const& { return storage::deref(); }
+
     // dereference
     auto operator*() -> T {
       return storage::deref();
