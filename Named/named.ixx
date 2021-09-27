@@ -83,12 +83,14 @@ export namespace mitama {
 /// `named`, `tag_t` and so on
 /// </summary>
 export namespace mitama {
-  // ???
+  // placeholder type for emplace construction
   template <static_string Tag, class ...Args>
   struct into {
     std::tuple<Args...> args;
   };
 
+  // primary
+  // owned storage
   template <class T>
   class named_storage {
     T value;
@@ -123,6 +125,8 @@ export namespace mitama {
     decltype(auto) indirect() const& { return std::addressof(value); }
   };
 
+  // specialization
+  // borrowed storage
   template <class T>
   class named_storage<T&> {
     std::reference_wrapper<T> ref;
@@ -144,7 +148,6 @@ export namespace mitama {
   };
 
   // `named`: opaque-type that strict-typed via phantom-type `Tag`.
-  //! Class Types in Non-Type Template Parameters [P0732R2]
   template <static_string Tag, class T = std::void_t<>>
   class named: named_storage<T> {
     using storage = named_storage<T>;
@@ -154,7 +157,8 @@ export namespace mitama {
     constexpr named() = delete;
 
     template <class U> requires std::constructible_from<T, U>
-    constexpr named(U&& from)
+    constexpr explicit(!std::is_convertible_v<U, T>)
+    named(U&& from)
       noexcept(std::is_nothrow_constructible_v<T, U>)
       : named_storage<T>{ std::forward<U>(from) }
     {}
@@ -193,7 +197,6 @@ export namespace mitama {
   };
 
   // `arg_t`: placeholder-type that strict-typed via phantom-type `Tag`.
-  //! Class Types in Non-Type Template Parameters [P0732R2]
   template <static_string Tag>
   struct arg_t {
     // Lazily constructs `named<Tag, T>` from `Args`
@@ -213,12 +216,10 @@ export namespace mitama {
   };
 
   // factory
-  //! Class Types in Non-Type Template Parameters [P0732R2]
   template <static_string Tag>
   inline constexpr arg_t<Tag> arg{};
 
   // arg literal
-  //! Class Types in Non-Type Template Parameters [P0732R2]
   namespace literals:: inline named_literals {
     template<fixed_storage S>
     inline constexpr auto operator""_arg() {
