@@ -5,27 +5,17 @@
 import meta_sort;
 import named;
 #include <iostream>
+#include <format>
 using namespace mitama::literals::named_literals;
+using namespace std::literals;
 
-void date_impl(int month, int day)
-{
-  std::cout << "month: " << month << " day: " << day << '\n';
-}
+int main() {
+  auto person = mitama::record{
+    "id"_arg = 1234,
+    "name"_arg = "Mitama"s,
+  };
 
-void date(mitama::named<"month"_tag, int> m, mitama::named<"day"_tag, int> d)
-{
-  date_impl(m.value(), d.value());
-}
-
-void date(mitama::named<"day"_tag, int> d, mitama::named<"month"_tag, int> m)
-{
-  date_impl(m.value(), d.value());
-}
-
-int main()
-{
-  date("month"_arg = 12, "day"_arg = 31);
-  date("day"_arg = 31, "month"_arg = 12);
+  std::cout << std::format("{}: {}", person["id"_tag], person["name"_tag]) << std::endl;
 }
 
 // void test(mitama::named<"name"_tag, std::string> name)
