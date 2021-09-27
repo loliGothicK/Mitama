@@ -4,10 +4,7 @@ module;
 #include <type_traits>
 #include <compare>
 #include <array>
-#include <vector>
-#include <ranges>
 #include <algorithm>
-#include <map>
 export module named;
 
 /// <summary>
@@ -73,7 +70,7 @@ export namespace mitama {
     else {
       std::array keys{ Named::tag... };
       std::sort(keys.begin(), keys.end());
-      return std::ranges::adjacent_find(keys) == keys.end();
+      return std::adjacent_find(keys.begin(), keys.end()) == keys.end();
     }
   }();
 }
