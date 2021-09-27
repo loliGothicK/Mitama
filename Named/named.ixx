@@ -4,6 +4,7 @@ module;
 #include <type_traits>
 #include <compare>
 #include <array>
+#include <vector>
 #include <ranges>
 #include <algorithm>
 #include <map>
@@ -49,34 +50,162 @@ export namespace mitama {
   }
 }
 
+// concept helper forwad declarations
+namespace mitama::mitamagic {
+  template <static_string, class>
+  struct is_named_as : std::false_type {};
+
+  template <class>
+  struct is_named_any : std::false_type {};
+}
+
+// concepts
+export namespace mitama {
+  template <class T, static_string Tag>
+  concept named_as = mitamagic::is_named_as<Tag, T>::value;
+
+  template <class T>
+  concept named_any = mitamagic::is_named_any<T>::value;
+
+  template <class ...Named>
+  concept distinct = [] {
+    if constexpr (sizeof...(Named) < 2) return true;
+    else {
+      std::array keys{ Named::tag... };
+      std::sort(keys.begin(), keys.end());
+      return std::ranges::adjacent_find(keys) == keys.end();
+    }
+  }();
+}
+
+
 /// <summary>
-/// `named<"tag"_tag, T>` and `"tag"_arg`
+/// `named`, `tag_t` and so on
 /// </summary>
 export namespace mitama {
+  // ???
+  template <static_string Tag, class ...Args>
+  struct into {
+    std::tuple<Args...> args;
+  };
+
+  template <class T>
+  class named_storage {
+    T value;
+  public:
+    named_storage() = delete;
+
+    template <class ...Args>
+      requires std::constructible_from<T, Args...>
+    constexpr explicit named_storage(Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>)
+      : value { std::forward<Args>(args)... }
+    {}
+
+    template <class ...Args>
+      requires std::constructible_from<T, Args...>
+    constexpr explicit named_storage(std::tuple<Args...> into)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>)
+      : named_storage{ into, std::index_sequence_for<Args...>{} }
+    {}
+
+    template <class ...Args, std::size_t ...Indices>
+      requires std::constructible_from<T, Args...>
+    constexpr explicit named_storage(std::tuple<Args...> into, std::index_sequence<Indices...>)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>)
+      : named_storage{ std::get<Indices>(into)...}
+    {}
+
+    decltype(auto) deref() &      { return value; }
+    decltype(auto) deref() const& { return value; }
+    
+    decltype(auto) indirect() &      { return std::addressof(value); }
+    decltype(auto) indirect() const& { return std::addressof(value); }
+  };
+
+  template <class T>
+  class named_storage<T&> {
+    std::reference_wrapper<T> ref;
+  public:
+    named_storage() = delete;
+
+    template <class U>
+      requires std::constructible_from<std::reference_wrapper<T>, U>
+    constexpr named_storage(U&& from)
+      noexcept(std::is_nothrow_constructible_v<std::reference_wrapper<T>, U>)
+      : ref{ from }
+    {}
+
+    decltype(auto) deref() &      { return ref.get(); }
+    decltype(auto) deref() const& { return ref.get(); }
+    
+    decltype(auto) indirect() &      { return std::addressof(ref.get()); }
+    decltype(auto) indirect() const& { return std::addressof(ref.get()); }
+  };
+
   // `named`: opaque-type that strict-typed via phantom-type `Tag`.
   //! Class Types in Non-Type Template Parameters [P0732R2]
-  template <static_string Tag, class T>
-  struct named {
+  template <static_string Tag, class T = std::void_t<>>
+  class named: named_storage<T> {
+    using storage = named_storage<T>;
+  public:
     static constexpr std::string_view tag = decltype(Tag)::value;
-    T value;
 
+    constexpr named() = delete;
+
+    template <class U> requires std::constructible_from<T, U>
+    constexpr named(U&& from)
+      noexcept(std::is_nothrow_constructible_v<T, U>)
+      : named_storage<T>{ std::forward<U>(from) }
+    {}
+
+    template <class ...Args> requires std::constructible_from<T, Args...>
+    constexpr named(into<Tag, Args...> into)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>)
+      : named_storage<T>{ into.args }
+    {}
+
+    // dereference
+    auto operator*() -> T {
+      return storage::deref();
+    }
+
+    // indirections
+    auto operator->() & -> std::decay_t<T>* {
+      return storage::indirect();
+    }
+    auto operator->() const& -> std::decay_t<T> const* {
+      return storage::indirect();
+    }
+
+  private:
+    // friend declaration for visibility of `oerator[]`
+    template <named_any ...Named> requires distinct<Named...>
+    friend class record;
+
+    // for records
     constexpr auto operator[](decltype(Tag)) const noexcept -> T {
-      return value;
+      return storage::deref();
     }
   };
-  
+
   // `arg_t`: placeholder-type that strict-typed via phantom-type `Tag`.
   //! Class Types in Non-Type Template Parameters [P0732R2]
   template <static_string Tag>
   struct arg_t {
-    template <class T>
-    constexpr auto operator()(T&& x) const noexcept {
-      return named<Tag, T>{ .value = std::forward<T>(x) };
+    // Lazily constructs `named<Tag, T>` from `Args`
+    // with a expression `named<Tag, T>{ std::forwad<Args>(args)... }`.
+    template <class ...Args>
+    constexpr auto operator()(Args&& ...args) const noexcept {
+      return into<Tag, Args...>{
+        .args = std::forward_as_tuple(std::forward<Args>(args)...)
+      };
     }
 
+    // Immediately constructs `named<Tag, T>`.
     template <class T>
     constexpr auto operator=(T&& x) const noexcept {
-      return named<Tag, T>{ .value = std::forward<T>(x) };
+      return named<Tag, T>{ std::forward<T>(x) };
     }
   };
 
@@ -97,33 +226,26 @@ export namespace mitama {
 
 // concept helpers
 namespace mitama::mitamagic {
-  template <static_string, class>
-  struct is_named_as : std::false_type {};
   template <static_string Tag, class _>
   struct is_named_as<Tag, named<Tag, _>> : std::true_type {};
 
-  template <class>
-  struct is_named_any : std::false_type {};
   template <static_string Any, class _>
   struct is_named_any<named<Any, _>> : std::true_type {};
-}
-
-// concepts
-export namespace mitama {
-  template <class T, static_string Tag>
-  concept named_as = mitamagic::is_named_as<Tag, T>::value;
-
-  template <class T>
-  concept named_any = mitamagic::is_named_any<T>::value;
 }
 
 // extensible record
 export namespace mitama {
   template <named_any ...Named>
+    requires distinct<Named...>
   class record: protected Named...
   {
   public:
-    constexpr record(Named... init) : Named{ init }... {}
+    template <class ...Args>
+    constexpr explicit record(Args&&... init)
+      noexcept((noexcept(Named{ std::forward<Args>(init) }) && ...))
+      : Named{ std::forward<Args>(init) }...
+    {}
+    
     using Named::operator[]...;
   };
 
