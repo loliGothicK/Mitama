@@ -1,7 +1,7 @@
 
 # RFC: Named parameters without any macros in C++20
 
-- Feature Name: named_params_via_phantom_types
+- Feature Name: named_params_via_cpp20
 - Start Date: 2021-09-27
 
 ## Summary
@@ -11,7 +11,7 @@ Allows to use named-parameters without macros in C++20.
 ## Motivation
 
 Without this RFC, one can use named parameters, but one must be declare some macros first.
-Thus one makes codes less visible, and this RFC introduces non-type templated opaque-type instead of macros.
+Thus one makes code less visible, and this RFC introduces non-type templated opaque-type instead of macros.
 
 ## Guide-level explanation
 
@@ -80,11 +80,11 @@ int main()
 This RFC introduces new templates `named` and `tag_t` instead of the macro
 and thus there are three breaking changes listed bellow:
 
-| braeking changes |          RFC           |     Siv3D     |
-| :--------------: | :--------------------: | :-----------: |
-| macro definition |      No more need      |     Need      |
-| named-parameter  | `named<"tag"_tag, Ty>` |  `tag_<Ty>`   |
-|  named-argument  |  `"tag"_arg = value`   | `tag = value` |
+| braeking changes |     Siv3D     |          RFC           |
+| :--------------: | :-----------: | :--------------------: |
+| macro definition |    needed     |    no longer needed    |
+| named-parameter  |  `tag_<Ty>`   | `named<"tag"_tag, Ty>` |
+|  named-argument  | `tag = value` |  `"tag"_arg = value`   |
 
 It is good that macros are no longer used,
 but the type names are a bit verbose,
