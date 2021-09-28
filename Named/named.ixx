@@ -333,4 +333,7 @@ export namespace mitama {
 
   template <named_any ...Named>
   record(Named...) -> record<sorted<Named...>>;
+
+  template <named_any ...Named>
+  using record_type = record<sorted<Named...>>;
 }
