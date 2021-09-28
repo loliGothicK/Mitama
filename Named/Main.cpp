@@ -15,4 +15,6 @@ int main() {
     "name"_ <= "Mitama"s,
   };
   std::cout << std::format("{}: {}", person["id"_], person["name"_]) << std::endl;
+
+  mitama::named<"a"_, std::string> _ = "a"_from(5, 'a');
 }

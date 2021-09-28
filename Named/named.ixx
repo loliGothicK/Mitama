@@ -97,7 +97,7 @@ namespace mitama {
       requires std::constructible_from<T, Args...>
     constexpr explicit named_storage(Args&&... args)
       noexcept(std::is_nothrow_constructible_v<T, Args...>)
-      : value { std::forward<Args>(args)... }
+      : value( std::forward<Args>(args)... )
     {}
 
     template <class ...Args>
@@ -214,9 +214,9 @@ export namespace mitama::literals:: inline named_literals {
   template<fixed_storage S>
   inline constexpr auto operator""_from()
   {
-    return [](auto&&... args) {
-      return into<default_v<static_string<S>>>{
-        .args = std::forward_as_tuple(std::forward<decltype(args)>(args)...)
+    return []<class ...Args>(Args&&... args) {
+      return into<default_v<static_string<S>>, Args...>{
+        .args = std::forward_as_tuple(std::forward<Args>(args)...)
       };
     };
   }
