@@ -11,6 +11,11 @@ module;
 #include <vector>
 export module named;
 
+namespace mitama {
+  template <std::default_initializable T>
+  inline constexpr T default_v{};
+}
+
 /// <summary>
 /// `static_string`: Phantom-type for `named<Tag, Ty>`.
 /// </summary>
@@ -198,38 +203,9 @@ export namespace mitama {
     }
   };
 
-  // `arg_t`: placeholder-type that strict-typed via phantom-type `Tag`.
-  template <static_string Tag>
-  struct arg_t {
-    static constexpr std::string_view str = decltype(Tag)::value;
-    static constexpr static_string tag = Tag;
-
-    // Lazily constructs `named<Tag, T>` from `Args`
-    // with a expression `named<Tag, T>{ std::forwad<Args>(args)... }`.
-    template <class ...Args>
-    constexpr auto operator()(Args&& ...args) const noexcept {
-      return into<Tag, Args...>{
-        .args = std::forward_as_tuple(std::forward<Args>(args)...)
-      };
-    }
-
-    // Immediately constructs `named<Tag, T>`.
-    template <class T>
-    constexpr auto operator=(T&& x) const noexcept {
-      return named<Tag, T>{ std::forward<T>(x) };
-    }
-  };
-
-  // factory
-  template <static_string Tag>
-  inline constexpr arg_t<Tag> arg{};
-
-  // arg literal
-  namespace literals:: inline named_literals {
-    template<fixed_storage S>
-    inline constexpr auto operator""_v() {
-      return arg< static_string<S>{} >;
-    }
+  template <auto S, class T>
+  constexpr auto operator<=(static_string<S>, T&& x) noexcept {
+    return named<default_v<static_string<S>>, T>{ std::forward<T>(x) };
   }
 }
 
@@ -240,9 +216,6 @@ namespace mitama::mitamagic {
 
   template <static_string Any, class _>
   struct is_named_any<named<Any, _>> : std::true_type {};
-
-  template <static_string Any>
-  struct is_named_any<arg_t<Any>> : std::true_type {};
 }
 
 export namespace mitama {
