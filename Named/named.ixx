@@ -31,6 +31,9 @@ namespace mitama {
 }
 
 export namespace mitama {
+  // non-type template enabled static string class
+  // 
+  // S: fixed_storage<N, CharT>
   template<auto S>
   struct static_string {
     static constexpr auto storage = S;
@@ -39,26 +42,23 @@ export namespace mitama {
     static constexpr std::basic_string_view<char_type> const
     value = { storage.s, decltype(storage)::size };
 
-    //! auto parameters
-    //! consistent comparisons
     template <auto T>
       requires std::same_as<char_type, typename static_string<T>::char_type>
     constexpr std::strong_ordering operator<=>(static_string<T>) const noexcept {
       return static_string::value <=> static_string<T>::value;
     }
   };
+}
 
-  // tag literal
-  //! auto parameters
-  namespace literals:: inline named_literals {
-    template<fixed_storage S>
-    inline constexpr static_string<S> operator""_() {
-      return {};
-    }
+export namespace mitama:: inline literals:: inline named_literals {
+  // static string literal
+  template<fixed_storage S>
+  inline constexpr static_string<S> operator""_() {
+    return {};
   }
 }
 
-// concept helper forwad declarations
+// forward declarations of concept helper
 namespace mitama::mitamagic {
   template <static_string, class>
   struct is_named_as : std::false_type {};
@@ -67,7 +67,7 @@ namespace mitama::mitamagic {
   struct is_named_any : std::false_type {};
 }
 
-// concepts
+// named concepts
 export namespace mitama {
   template <class T, static_string Tag>
   concept named_as = mitamagic::is_named_as<Tag, std::remove_cvref_t<T>>::value;
@@ -95,6 +95,7 @@ namespace mitama {
     constexpr named_storage& operator=(named_storage const&) = default;
     constexpr named_storage& operator=(named_storage&&) = default;
 
+    // basic constructor
     template <class ...Args>
       requires std::constructible_from<T, Args...>
     constexpr explicit named_storage(Args&&... args)
@@ -102,6 +103,7 @@ namespace mitama {
       : value( std::forward<Args>(args)... )
     {}
 
+    // delegating constructor for emplace construction
     template <class ...Args>
       requires std::constructible_from<T, Args...>
     constexpr explicit named_storage(std::tuple<Args...> into)
@@ -109,6 +111,8 @@ namespace mitama {
       : named_storage{ into, std::index_sequence_for<Args...>{} }
     {}
 
+  private:
+    // called between delegating constructor and basic constructor
     template <class ...Args, std::size_t ...Indices>
       requires std::constructible_from<T, Args...>
     constexpr explicit named_storage(std::tuple<Args...> into, std::index_sequence<Indices...>)
@@ -116,6 +120,7 @@ namespace mitama {
       : named_storage{ std::get<Indices>(into)...}
     {}
 
+  public:
     decltype(auto) deref() &      { return value; }
     decltype(auto) deref() const& { return value; }
     
@@ -135,6 +140,7 @@ namespace mitama {
     constexpr named_storage& operator=(named_storage const&) = default;
     constexpr named_storage& operator=(named_storage&&) = default;
 
+    // basic constructor
     template <class U>
       requires std::constructible_from<std::reference_wrapper<T>, U>
     constexpr named_storage(U&& from)
@@ -151,7 +157,7 @@ namespace mitama {
 }
 
 export namespace mitama {
-  // `named`: opaque-type that strict-typed via phantom-type `Tag`.
+  // Opaque-type that strict-typed via a phantom-parameter `Tag`.
   template <static_string Tag, class T = std::void_t<>>
   class named: named_storage<T> {
     using storage = named_storage<T>;
@@ -165,6 +171,7 @@ export namespace mitama {
     constexpr named& operator=(named const&) = default;
     constexpr named& operator=(named&&) = default;
 
+    // basic constructor (for direct init)
     template <class U> requires std::constructible_from<T, U>
     constexpr explicit(!std::is_convertible_v<U, T>)
     named(U&& from)
@@ -172,12 +179,14 @@ export namespace mitama {
       : named_storage<T>{ std::forward<U>(from) }
     {}
 
+    // emplace constructor
     template <class ...Args> requires std::constructible_from<T, Args...>
     constexpr named(into<Tag, Args...> into)
       noexcept(std::is_nothrow_constructible_v<T, Args...>)
       : named_storage<T>{ into.args }
     {}
 
+    // accessors
     decltype(auto) value() &      { return storage::deref(); }
     decltype(auto) value() const& { return storage::deref(); }
 
@@ -205,14 +214,35 @@ export namespace mitama {
     }
   };
 
-}
+  // Internal compiler error:
+  // [ TODO: Minimize the problem and submit a bug report. ]
+  //  
+  // template <static_string _>
+  // class named<_, void> {
+  //   static_assert([]{ return false; }(), "Sorry, not implemented yet.");
+  // };
 
-export namespace mitama::literals:: inline named_literals {
+
+  // Overloading to make it easier to build `named`.
+  // [ Example:
+  //    ```cpp
+  //    named<"id"_, int> id = "id"_ <= 42; 
+  //    ```
+  //    -- end example ]
   template <auto S, class T>
   constexpr auto operator<=(static_string<S>, T&& x) noexcept {
     return named<default_v<static_string<S>>, T>{ std::forward<T>(x) };
   }
+}
 
+export namespace mitama:: inline literals:: inline named_literals {
+  // UDL for emplace construction
+  //
+  // [ Example:
+  //    ```cpp
+  //    named<"aaa"_, std::string> aaa = "aaa"_from(3, 'a');
+  //    ```
+  //    -- end example ]
   template<fixed_storage S>
   inline constexpr auto operator""_from()
   {
@@ -233,6 +263,7 @@ namespace mitama::mitamagic {
   struct is_named_any<named<Any, _>> : std::true_type {};
 }
 
+// Type List
 export namespace mitama {
   template <class ...> struct type_list {};
 
@@ -253,16 +284,23 @@ export namespace mitama {
 }
 
 namespace mitama {
+  // This is power of C++20
+  // FYI: 
+  // https://stackoverflow.com/a/59567081
+  // https://twitter.com/yaito3014/status/1442645605860347904
+
+  // Named... :: named_any -> [usize; sizeof...(Named)]
+  // Receive named and returns array of index that sorted state.
   template <named_any ...Named>
   constexpr auto sorted_indices = []<std::size_t ...Indices>(std::index_sequence<Indices...>) {
-    using var_t = std::variant<std::integral_constant<std::size_t, Indices>...>;
-    std::array arr{ var_t{std::in_place_index<Indices>}... };
-    auto key = [](var_t v) {
-      return std::visit([](auto i) { return list_element_t<decltype(i)::value, type_list<Named...>>::str; }, v);
+    using boxed_index = std::variant<std::integral_constant<std::size_t, Indices>...>;
+    std::array arr{ boxed_index{std::in_place_index<Indices>}... };
+    auto key = [](boxed_index boxed) {
+      return std::visit([](auto i) {
+        return list_element_t<decltype(i)::value, type_list<Named...>>::str;
+      }, boxed);
     };
-    auto cmp = [key](auto lhs, auto rhs) {
-      return key(lhs) < key(rhs);
-    };
+    auto cmp = [key](auto lhs, auto rhs) { return key(lhs) < key(rhs); };
     std::sort(arr.begin(), arr.end(), cmp);
     return arr;
   }(std::index_sequence_for<Named...>{});
@@ -275,10 +313,23 @@ namespace mitama {
     using type = type_list<list_element_t<sorted_indices<Named...>[I].index(), type_list<Named...>>...>;
   };
 
+  // Returns sorted `Named...` packed into `type_list`.
+  // [ Note:
+  //    ```cpp
+  //    using A = decltype("a"_ <= 1);
+  //    using B = decltype("b"_ <= 2);
+  //    using C = decltype("c"_ <= 3);
+  // 
+  //    using expected = type_list<A, B, C>;
+  // 
+  //    static_assert( std::same_as<expected, sorted<C, A, B>>); // OK
+  //    ```
+  //    -- end note ]
   template <named_any ...Named>
   using sorted = sort<std::index_sequence_for<Named...>, Named...>::type;
 }
 
+// Concepts for Extensible Records
 export namespace mitama {
   template <class ...Named>
   concept distinct = [] {
@@ -300,7 +351,7 @@ export namespace mitama {
   }();
 }
 
-// extensible record
+// Extensible Records
 export namespace mitama {
   template <class>
   class record;
