@@ -203,9 +203,22 @@ export namespace mitama {
     }
   };
 
+}
+
+export namespace mitama::literals:: inline named_literals {
   template <auto S, class T>
   constexpr auto operator<=(static_string<S>, T&& x) noexcept {
     return named<default_v<static_string<S>>, T>{ std::forward<T>(x) };
+  }
+
+  template<fixed_storage S>
+  inline constexpr auto operator""_from()
+  {
+    return [](auto&&... args) {
+      return into<default_v<static_string<S>>>{
+        .args = std::forward_as_tuple(std::forward<decltype(args)>(args)...)
+      };
+    };
   }
 }
 
