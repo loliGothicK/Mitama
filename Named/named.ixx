@@ -367,6 +367,8 @@ export namespace mitama {
       : Named{ std::get<Indices>(args) }...
     {}
   public:
+    static constexpr std::array tags = { Named::str... };
+
     template <named_any ...Args>
     constexpr record(Args&&... args)
       : record{
@@ -387,4 +389,10 @@ export namespace mitama {
 
   template <named_any ...Named>
   using record_type = record<sorted<Named...>>;
+
+  template <class Record, static_string ...Required>
+  concept has = []{
+    auto tags = Record::tags;
+    return (std::binary_search(tags.cbegin(), tags.cend(), decltype(Required)::value) && ...);
+  }();
 }

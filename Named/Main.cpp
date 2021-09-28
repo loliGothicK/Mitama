@@ -20,7 +20,12 @@ int main() {
       "id"_ <= 1234,
       "name"_ <= "Mitama"s,
     };
-    std::cout << std::format("{}: {}", person["id"_], person["name"_]) << std::endl;
+
+    auto fn = [](mitama::has<"id"_, "name"_> auto person) {
+      std::cout << std::format("{}: {}", person["id"_], person["name"_]) << std::endl;
+    };
+
+    fn(person);
   }
 }
 
