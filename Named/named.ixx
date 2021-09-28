@@ -5,6 +5,10 @@ module;
 #include <compare>
 #include <array>
 #include <algorithm>
+#include <variant>
+#include <tuple>
+#include <ranges>
+#include <vector>
 export module named;
 
 /// <summary>
@@ -41,7 +45,7 @@ export namespace mitama {
   //! auto parameters
   namespace literals:: inline named_literals {
     template<fixed_storage S>
-    inline constexpr static_string<S> operator""_tag() {
+    inline constexpr static_string<S> operator""_() {
       return {};
     }
   }
@@ -59,22 +63,30 @@ namespace mitama::mitamagic {
 // concepts
 export namespace mitama {
   template <class T, static_string Tag>
-  concept named_as = mitamagic::is_named_as<Tag, T>::value;
+  concept named_as = mitamagic::is_named_as<Tag, std::remove_cvref_t<T>>::value;
 
   template <class T>
-  concept named_any = mitamagic::is_named_any<T>::value;
+  concept named_any = mitamagic::is_named_any<std::remove_cvref_t<T>>::value;
 
   template <class ...Named>
   concept distinct = [] {
     if constexpr (sizeof...(Named) < 2) return true;
     else {
-      std::array keys{ Named::tag... };
+      std::array keys{ Named::str... };
       std::sort(keys.begin(), keys.end());
       return std::adjacent_find(keys.begin(), keys.end()) == keys.end();
     }
   }();
-}
 
+  template <class ...Named>
+  concept is_sorted = [] {
+    if constexpr (sizeof...(Named) < 2) return true;
+    else {
+      std::array keys{ Named::str... };
+      return std::is_sorted(keys.begin(), keys.end());
+    }
+  }();
+}
 
 /// <summary>
 /// `named`, `tag_t` and so on
@@ -149,9 +161,14 @@ export namespace mitama {
   class named: named_storage<T> {
     using storage = named_storage<T>;
   public:
-    static constexpr std::string_view tag = decltype(Tag)::value;
+    static constexpr std::string_view str = decltype(Tag)::value;
+    static constexpr static_string tag = Tag;
 
     constexpr named() = delete;
+    constexpr named(named const&) = default;
+    constexpr named(named&&) = default;
+    constexpr named& operator=(named const&) = default;
+    constexpr named& operator=(named&&) = default;
 
     template <class U> requires std::constructible_from<T, U>
     constexpr explicit(!std::is_convertible_v<U, T>)
@@ -184,7 +201,7 @@ export namespace mitama {
 
   private:
     // friend declaration for visibility of `oerator[]`
-    template <named_any ...Named> requires distinct<Named...>
+    template <class>
     friend class record;
 
     // for records
@@ -196,6 +213,9 @@ export namespace mitama {
   // `arg_t`: placeholder-type that strict-typed via phantom-type `Tag`.
   template <static_string Tag>
   struct arg_t {
+    static constexpr std::string_view str = decltype(Tag)::value;
+    static constexpr static_string tag = Tag;
+
     // Lazily constructs `named<Tag, T>` from `Args`
     // with a expression `named<Tag, T>{ std::forwad<Args>(args)... }`.
     template <class ...Args>
@@ -219,7 +239,7 @@ export namespace mitama {
   // arg literal
   namespace literals:: inline named_literals {
     template<fixed_storage S>
-    inline constexpr auto operator""_arg() {
+    inline constexpr auto operator""_v() {
       return arg< static_string<S>{} >;
     }
   }
@@ -232,24 +252,88 @@ namespace mitama::mitamagic {
 
   template <static_string Any, class _>
   struct is_named_any<named<Any, _>> : std::true_type {};
+
+  template <static_string Any>
+  struct is_named_any<arg_t<Any>> : std::true_type {};
+}
+
+export namespace mitama {
+  template <class ...> struct type_list {};
+
+  template <std::size_t, class>
+  struct list_element {};
+
+  template <std::size_t I, class Head, class ...Tail> requires (I == 0)
+    struct list_element<I, type_list<Head, Tail...>>
+    : std::type_identity<Head>
+  {};
+  template <std::size_t I, class Head, class ...Tail> requires (I != 0)
+    struct list_element<I, type_list<Head, Tail...>>
+    : std::type_identity<typename list_element<I - 1, type_list<Tail...>>::type>
+  {};
+
+  template <std::size_t I, class T>
+  using list_element_t = list_element<I, T>::type;
+}
+
+namespace mitama {
+  template <named_any ...Named>
+  constexpr auto sorted_indices = []<std::size_t ...Indices>(std::index_sequence<Indices...>) {
+    using var_t = std::variant<std::integral_constant<std::size_t, Indices>...>;
+    std::array arr{ var_t{std::in_place_index<Indices>}... };
+    auto key = [](var_t v) {
+      return std::visit([](auto i) { return list_element_t<decltype(i)::value, type_list<Named...>>::str; }, v);
+    };
+    auto cmp = [key](auto lhs, auto rhs) {
+      return key(lhs) < key(rhs);
+    };
+    std::sort(arr.begin(), arr.end(), cmp);
+    return arr;
+  }(std::index_sequence_for<Named...>{});
+
+  template <class, named_any...>
+  struct sort;
+
+  template <std::size_t ...I, named_any... Named>
+  struct sort<std::index_sequence<I...>, Named...> {
+    using type = type_list<list_element_t<sorted_indices<Named...>[I].index(), type_list<Named...>>...>;
+  };
+
+  export template <named_any ...Named>
+  using sorted = sort<std::index_sequence_for<Named...>, Named...>::type;
 }
 
 // extensible record
 export namespace mitama {
+  template <class>
+  class record;
+
   template <named_any ...Named>
-    requires distinct<Named...>
-  class record: protected Named...
+    requires distinct<Named...> 
+          && is_sorted<Named...>
+  class record<type_list<Named...>>: protected Named...
   {
+    template <std::size_t ...Indices, class ...Args>
+    constexpr explicit record(std::index_sequence<Indices...>, std::tuple<Args...> args)
+      noexcept((noexcept(Named{ std::get<Indices>(args) }) && ...))
+      : Named{ std::get<Indices>(args) }...
+    {}
   public:
-    template <class ...Args>
-    constexpr explicit record(Args&&... init)
-      noexcept((noexcept(Named{ std::forward<Args>(init) }) && ...))
-      : Named{ std::forward<Args>(init) }...
+    template <named_any ...Args>
+    constexpr record(Args&&... args)
+      : record{
+          std::index_sequence_for<Args...>{},
+          [t = std::forward_as_tuple(std::forward<Args>(args)...)]
+          <std::size_t ...Indices>(std::index_sequence<Indices...>) {
+            return std::forward_as_tuple(
+              std::get<sorted_indices<Args...>[Indices].index()>(t)...);
+          }(std::index_sequence_for<Args...>{})
+        }
     {}
     
     using Named::operator[]...;
   };
 
   template <named_any ...Named>
-  record(Named...) -> record<Named...>;
+  record(Named...) -> record<sorted<Named...>>;
 }
