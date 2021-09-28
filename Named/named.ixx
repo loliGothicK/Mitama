@@ -67,25 +67,6 @@ export namespace mitama {
 
   template <class T>
   concept named_any = mitamagic::is_named_any<std::remove_cvref_t<T>>::value;
-
-  template <class ...Named>
-  concept distinct = [] {
-    if constexpr (sizeof...(Named) < 2) return true;
-    else {
-      std::array keys{ Named::str... };
-      std::sort(keys.begin(), keys.end());
-      return std::adjacent_find(keys.begin(), keys.end()) == keys.end();
-    }
-  }();
-
-  template <class ...Named>
-  concept is_sorted = [] {
-    if constexpr (sizeof...(Named) < 2) return true;
-    else {
-      std::array keys{ Named::str... };
-      return std::is_sorted(keys.begin(), keys.end());
-    }
-  }();
 }
 
 namespace mitama {
@@ -308,6 +289,27 @@ namespace mitama {
 
   export template <named_any ...Named>
   using sorted = sort<std::index_sequence_for<Named...>, Named...>::type;
+}
+
+export namespace mitama {
+  template <class ...Named>
+  concept distinct = [] {
+    if constexpr (sizeof...(Named) < 2) return true;
+    else {
+      std::array keys{ Named::str... };
+      std::sort(keys.begin(), keys.end());
+      return std::adjacent_find(keys.begin(), keys.end()) == keys.end();
+    }
+  }();
+
+  template <class ...Named>
+  concept is_sorted = [] {
+    if constexpr (sizeof...(Named) < 2) return true;
+    else {
+      std::array keys{ Named::str... };
+      return std::is_sorted(keys.begin(), keys.end());
+    }
+  }();
 }
 
 // extensible record
