@@ -102,6 +102,10 @@ namespace mitama {
     T value;
   public:
     named_storage() = delete;
+    constexpr named_storage(named_storage const&) = default;
+    constexpr named_storage(named_storage&&) = default;
+    constexpr named_storage& operator=(named_storage const&) = default;
+    constexpr named_storage& operator=(named_storage&&) = default;
 
     template <class ...Args>
       requires std::constructible_from<T, Args...>
@@ -138,6 +142,10 @@ namespace mitama {
     std::reference_wrapper<T> ref;
   public:
     named_storage() = delete;
+    constexpr named_storage(named_storage const&) = default;
+    constexpr named_storage(named_storage&&) = default;
+    constexpr named_storage& operator=(named_storage const&) = default;
+    constexpr named_storage& operator=(named_storage&&) = default;
 
     template <class U>
       requires std::constructible_from<std::reference_wrapper<T>, U>
