@@ -19,7 +19,7 @@ namespace mitama {
 /// <summary>
 /// `static_string`: Phantom-type for `named<Tag, Ty>`.
 /// </summary>
-export namespace mitama {
+namespace mitama {
   template<std::size_t N>
   struct fixed_storage {
     static constexpr std::size_t size = N;
@@ -32,7 +32,9 @@ export namespace mitama {
 
     char const s[N];
   };
+}
 
+export namespace mitama {
   template<auto S>
   struct static_string {
     static constexpr auto storage = S;
