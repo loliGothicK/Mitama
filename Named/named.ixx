@@ -275,7 +275,7 @@ namespace mitama {
     using type = type_list<list_element_t<sorted_indices<Named...>[I].index(), type_list<Named...>>...>;
   };
 
-  export template <named_any ...Named>
+  template <named_any ...Named>
   using sorted = sort<std::index_sequence_for<Named...>, Named...>::type;
 }
 
