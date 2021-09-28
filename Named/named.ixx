@@ -88,10 +88,7 @@ export namespace mitama {
   }();
 }
 
-/// <summary>
-/// `named`, `tag_t` and so on
-/// </summary>
-export namespace mitama {
+namespace mitama {
   // placeholder type for emplace construction
   template <static_string Tag, class ...Args>
   struct into {
@@ -155,7 +152,9 @@ export namespace mitama {
     decltype(auto) indirect() &      { return std::addressof(ref.get()); }
     decltype(auto) indirect() const& { return std::addressof(ref.get()); }
   };
+}
 
+export namespace mitama {
   // `named`: opaque-type that strict-typed via phantom-type `Tag`.
   template <static_string Tag, class T = std::void_t<>>
   class named: named_storage<T> {
