@@ -13,13 +13,43 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Extensible">
+      <UniqueIdentifier>{7e8dfe59-4f3e-47fe-b956-e655099cea9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Extensible\Data">
+      <UniqueIdentifier>{a2a998f4-b8f1-487f-b4b8-77295596e64f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Extensible\Data\Internal">
+      <UniqueIdentifier>{41f92ac8-a87f-41cf-af61-fd75078ffce5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="extensible.ixx">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="extensible.ixx">
+      <Filter>Header Files\Extensible</Filter>
+    </ClCompile>
+    <ClCompile Include="functional.ixx">
+      <Filter>Header Files\Extensible</Filter>
+    </ClCompile>
+    <ClCompile Include="utility.ixx">
+      <Filter>Header Files\Extensible</Filter>
+    </ClCompile>
+    <ClCompile Include="into.ixx">
+      <Filter>Header Files\Extensible\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="named.ixx">
+      <Filter>Header Files\Extensible\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="static_string.ixx">
+      <Filter>Header Files\Extensible\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="type_list.ixx">
+      <Filter>Header Files\Extensible\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="storage.ixx">
+      <Filter>Header Files\Extensible\Data\Internal</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

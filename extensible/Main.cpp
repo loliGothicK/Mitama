@@ -2,10 +2,10 @@
 /// Extensible Records in C++20
 ///
 
-import extensible;
+import Mitama.Extensible;
 #include <iostream>
 #include <format>
-using namespace mitama::literals::named_literals;
+using namespace mitama::literals;
 using namespace std::literals;
 
 int main() {
@@ -15,8 +15,8 @@ int main() {
 
   { // Extensible Records
     auto john = mitama::record{
-      "id"_ <= 1234,
-      "name"_ <= "John"s,
+      "id"_ << 1234,
+      "name"_ << "John"s,
     };
 
     auto fn1 = [](mitama::has<"id"_, "name"_> auto person) {
@@ -29,9 +29,9 @@ int main() {
     using new_person_t = person_t::spread<mitama::named<"phone_number"_, std::string>>;
 
     new_person_t tom {
-      "id"_ <= 1234,
-      "name"_ <= "Tom"s,
-      "phone_number"_ <= "123-4567-8910"s,
+      "id"_   << 1234,
+      "name"_ << "Tom"s,
+      "phone_number"_ << "123-4567-8910"s,
     };
 
     auto fn2 = [](mitama::has<"phone_number"_> auto person) {
@@ -42,6 +42,19 @@ int main() {
 
     using old_person_t = new_person_t::shrink<"phone_number"_>;
     static_assert(std::same_as<person_t, old_person_t>);
+
+    [](mitama::records auto&&){}(tom);
+  }
+  {
+    using Person = mitama::record_type
+                   < mitama::named<"id"_,   int>
+                   , mitama::named<"name"_, std::string>
+                   >;
+
+    Person _ = mitama::empty
+             | "id"_   << 1234
+             | "name"_ << "John"s
+             ;
   }
 }
 

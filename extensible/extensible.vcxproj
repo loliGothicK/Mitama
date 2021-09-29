@@ -141,7 +141,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="extensible.ixx" />
+    <ClCompile Include="functional.ixx" />
+    <ClCompile Include="into.ixx" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="named.ixx" />
+    <ClCompile Include="static_string.ixx" />
+    <ClCompile Include="storage.ixx" />
+    <ClCompile Include="type_list.ixx" />
+    <ClCompile Include="utility.ixx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
