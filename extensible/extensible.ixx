@@ -11,7 +11,7 @@ module;
 #include <utility>
 #include <variant>
 #include <vector>
-export module named;
+export module extensible;
 
 namespace mitama {
   template <std::default_initializable T>

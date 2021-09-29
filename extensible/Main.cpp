@@ -1,12 +1,10 @@
 ///
-/// Named parameters without any macros in C++20
+/// Extensible Records in C++20
 ///
 
-import named;
-
+import extensible;
 #include <iostream>
 #include <format>
-#include <boost/type_index.hpp>
 using namespace mitama::literals::named_literals;
 using namespace std::literals;
 
