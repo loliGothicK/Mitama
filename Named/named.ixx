@@ -2,11 +2,15 @@ module;
 #include <algorithm>
 #include <array>
 #include <compare>
+#include <iterator>
 #include <string_view>
+#include <ranges>
+#include <set>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <variant>
+#include <vector>
 export module named;
 
 namespace mitama {
@@ -217,10 +221,12 @@ export namespace mitama {
   // Internal compiler error:
   // [ TODO: Minimize the problem and submit a bug report. ]
   //  
-  // template <static_string _>
-  // class named<_, void> {
-  //   static_assert([]{ return false; }(), "Sorry, not implemented yet.");
-  // };
+   template <static_string Tag>
+   class named<Tag, void> {
+   public:
+     static constexpr std::string_view str = decltype(Tag)::value;
+     static constexpr static_string tag = Tag;
+   };
 
 
   // Overloading to make it easier to build `named`.
@@ -281,6 +287,17 @@ export namespace mitama {
 
   template <std::size_t I, class T>
   using list_element_t = list_element<I, T>::type;
+
+  template <class>
+  struct list_size;
+
+  template <class... _>
+  struct list_size<type_list<_...>> {
+    static constexpr auto value = sizeof...(_);
+  };
+
+  template <class T>
+  inline constexpr auto list_size_v = list_size<T>::value;
 }
 
 namespace mitama {
@@ -327,6 +344,26 @@ namespace mitama {
   //    -- end note ]
   template <named_any ...Named>
   using sorted = sort<std::index_sequence_for<Named...>, Named...>::type;
+
+  template <class, class, named_any ...>
+  struct difference;
+
+  template <named_any Head, named_any ...Tail, named_any... Result, named_any ...ToRemove>
+  struct difference<type_list<Head, Tail...>, type_list<Result...>, ToRemove...> {
+    using type = std::conditional_t<
+      ((Head::str == ToRemove::str) || ...),
+      typename difference<type_list<Tail...>, type_list<Result...>, ToRemove...>::type,
+      typename difference<type_list<Tail...>, type_list<Result..., Head>, ToRemove...>::type
+    >;
+  };
+
+  template <named_any... Result, named_any ...ToRemove>
+  struct difference<type_list<>, type_list<Result...>, ToRemove...> {
+    using type = type_list<Result...>;
+  };
+
+  template <class List, static_string ...ToRemove>
+  using erased = difference<List, type_list<>, named<ToRemove>...>::type;
 }
 
 // Concepts for Extensible Records
@@ -359,7 +396,8 @@ export namespace mitama {
   template <named_any ...Named>
     requires distinct<Named...> 
           && is_sorted<Named...>
-  class record<type_list<Named...>>: protected Named...
+  class record<type_list<Named...>>
+      : protected Named...
   {
     template <std::size_t ...Indices, class ...Args>
     constexpr explicit record(std::index_sequence<Indices...>, std::tuple<Args...> args)
@@ -368,6 +406,7 @@ export namespace mitama {
     {}
   public:
     static constexpr std::array tags = { Named::str... };
+    static constexpr auto size = sizeof...(Named);
 
     template <named_any ...Args>
     constexpr record(Args&&... args)
@@ -382,6 +421,12 @@ export namespace mitama {
     {}
     
     using Named::operator[]...;
+
+    template <named_any ...New>
+    using spread = record< sorted<Named..., New...> >;
+
+    template <static_string ...Keys>
+    using shrink = record< erased<type_list<Named...>, Keys...> >;
   };
 
   template <named_any ...Named>
