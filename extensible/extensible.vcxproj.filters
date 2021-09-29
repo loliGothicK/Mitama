@@ -22,18 +22,18 @@
     <Filter Include="Header Files\Extensible\Data\Internal">
       <UniqueIdentifier>{41f92ac8-a87f-41cf-af61-fd75078ffce5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Extensible\Functional">
+      <UniqueIdentifier>{da0e1dea-112f-439a-825c-186d9aba7ad7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Extensible\Utility">
+      <UniqueIdentifier>{f0e7fc6b-3c5f-4366-b702-d2d79d733237}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="extensible.ixx">
-      <Filter>Header Files\Extensible</Filter>
-    </ClCompile>
-    <ClCompile Include="functional.ixx">
-      <Filter>Header Files\Extensible</Filter>
-    </ClCompile>
-    <ClCompile Include="utility.ixx">
+    <ClCompile Include="prelude.ixx">
       <Filter>Header Files\Extensible</Filter>
     </ClCompile>
     <ClCompile Include="into.ixx">
@@ -50,6 +50,18 @@
     </ClCompile>
     <ClCompile Include="storage.ixx">
       <Filter>Header Files\Extensible\Data\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="record_internal.ixx">
+      <Filter>Header Files\Extensible\Data\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="record.ixx">
+      <Filter>Header Files\Extensible\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="functional.ixx">
+      <Filter>Header Files\Extensible\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="utility.ixx">
+      <Filter>Header Files\Extensible\Utility</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

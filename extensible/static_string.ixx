@@ -2,9 +2,9 @@ module;
 #include <cstddef>
 #include <string_view>
 #include <type_traits>
-export import Mitama.Extensible.Utility;
 export module Mitama.Data.Extensible.StaticString;
-export import Mitama.Data.Extensible.Into;
+import Mitama.Utility.Extensible;
+import Mitama.Data.Extensible.Into;
 
 namespace mitama {
   template<std::size_t N, class CharT>

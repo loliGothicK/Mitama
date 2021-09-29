@@ -140,11 +140,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="extensible.ixx" />
+    <ClCompile Include="prelude.ixx" />
     <ClCompile Include="functional.ixx" />
     <ClCompile Include="into.ixx" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="named.ixx" />
+    <ClCompile Include="record.ixx" />
+    <ClCompile Include="record_internal.ixx" />
     <ClCompile Include="static_string.ixx" />
     <ClCompile Include="storage.ixx" />
     <ClCompile Include="type_list.ixx" />

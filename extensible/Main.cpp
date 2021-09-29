@@ -2,7 +2,8 @@
 /// Extensible Records in C++20
 ///
 
-import Mitama.Extensible;
+import Mitama.Data.Extensible.Record;
+import Mitama.Data.Extensible.Named;
 #include <iostream>
 #include <format>
 using namespace mitama::literals;

@@ -1,6 +1,6 @@
 module;
 #include <utility>
-export module Mitama.Extensible.Functional;
+export module Mitama.Functional.Extensible;
 
 export namespace mitama {
   template <class ...Fn>

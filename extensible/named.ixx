@@ -7,9 +7,10 @@ module;
 #include <type_traits>
 #include <utility>
 export module Mitama.Data.Extensible.Named;
-export import Mitama.Extensible.Functional;
-export import Mitama.Data.Extensible.StaticString;
-export import Mitama.Data.Extensible.TypeList;
+import Mitama.Functional.Extensible;
+import Mitama.Data.Extensible.Into;
+import Mitama.Data.Extensible.StaticString;
+import Mitama.Data.Extensible.TypeList;
 import :Storage;
 
 export namespace mitama {
@@ -91,23 +92,4 @@ export namespace mitama {
   constexpr auto operator<<(static_string<S>, T&& x) noexcept {
     return named<default_v<static_string<S>>, T>{ std::forward<T>(x) };
   }
-}
-
-// named concepts
-export namespace mitama:: inline where {
-  template <class T, static_string Tag>
-  concept named_as = [] {
-    return overloaded{
-      [](...) { return false; },
-      []<class _>(std::type_identity<named<Tag, _>>) { return true; }
-    }(std::type_identity<std::remove_cvref_t<std::remove_cvref_t<T>>>());
-  }();
-
-  template <class T>
-  concept named_any = [] {
-    return overloaded{
-      [](...) { return false; },
-      []<auto Any, class _>(std::type_identity<named<Any, _>>) { return true; }
-    }(std::type_identity<std::remove_cvref_t<std::remove_cvref_t<T>>>());
-  }();
 }

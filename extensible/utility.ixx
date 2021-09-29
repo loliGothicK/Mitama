@@ -1,6 +1,6 @@
 module;
 #include <concepts>
-export module Mitama.Extensible.Utility;
+export module Mitama.Utility.Extensible;
 
 export namespace mitama {
   template <std::default_initializable T>
