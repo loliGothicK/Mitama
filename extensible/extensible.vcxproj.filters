@@ -28,6 +28,9 @@
     <Filter Include="Header Files\Extensible\Utility">
       <UniqueIdentifier>{f0e7fc6b-3c5f-4366-b702-d2d79d733237}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Extensible\Concepts">
+      <UniqueIdentifier>{ed3deac6-077f-431a-aaf2-63ce4b555816}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -35,9 +38,6 @@
     </ClCompile>
     <ClCompile Include="prelude.ixx">
       <Filter>Header Files\Extensible</Filter>
-    </ClCompile>
-    <ClCompile Include="into.ixx">
-      <Filter>Header Files\Extensible\Data</Filter>
     </ClCompile>
     <ClCompile Include="named.ixx">
       <Filter>Header Files\Extensible\Data</Filter>
@@ -63,5 +63,14 @@
     <ClCompile Include="utility.ixx">
       <Filter>Header Files\Extensible\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="Concepts.ixx">
+      <Filter>Header Files\Extensible\Concepts</Filter>
+    </ClCompile>
+    <ClCompile Include="ADT.ixx">
+      <Filter>Header Files\Extensible\Data</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

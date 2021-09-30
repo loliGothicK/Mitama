@@ -4,9 +4,8 @@ module;
 #include <type_traits>
 export module Mitama.Data.Extensible.StaticString;
 import Mitama.Utility.Extensible;
-import Mitama.Data.Extensible.Into;
 
-namespace mitama {
+export namespace mitama {
   template<std::size_t N, class CharT>
   struct fixed_storage {
     static constexpr std::size_t size = N;
@@ -39,6 +38,10 @@ export namespace mitama {
       constexpr std::strong_ordering operator<=>(static_string<T>) const noexcept {
       return static_string::value <=> static_string<T>::value;
     }
+
+    constexpr operator std::basic_string_view<char_type>() const {
+      return value;
+    }
   };
 }
 
@@ -47,17 +50,5 @@ export namespace mitama:: inline literals:: inline static_string_literals{
   template<fixed_storage S>
   inline constexpr static_string<S> operator""_() {
     return {};
-  }
-
-  // UDL for in place construction
-  //
-  // [ Example:
-  //    ```cpp
-  //    named<"aaa"_, std::string> aaa = "aaa"_from(3, 'a');
-  //    ```
-  //    -- end example ]
-  template<fixed_storage S>
-  inline constexpr auto operator""_from() {
-    return into<default_v<static_string<S>>>;
   }
 }

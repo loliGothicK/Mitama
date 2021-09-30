@@ -1,61 +1,90 @@
 ///
-/// Extensible Records in C++20
+/// # Mitama.Extensible
+/// 
+/// The library with new C++20 features for raw polymorphism.
 ///
 
 import Mitama.Data.Extensible.Record;
-import Mitama.Data.Extensible.Named;
+import Mitama.Data.Extensible.ADT;
 #include <iostream>
 #include <format>
+#include <map>
+#include <string_view>
+#include <vector>
+#include <initializer_list>
+#include <tuple>
+
 using namespace mitama::literals;
 using namespace std::literals;
 
 int main() {
-  { // operator""_from
-    mitama::named<"a"_, std::string> _ = "a"_from(5, 'a');
+  {
+    // record type declaration
+    using Person = mitama::record_type
+                   < mitama::named<"name"_, std::string>
+                   , mitama::named<"age"_,  int>
+                   >;
+
+    // make record
+    Person john = mitama::empty
+                += "name"_ % "John"s
+                += "age"_  % 42
+                ;
+    
+    // field select and structured binding
+    auto const& [name, age] = mitama::select<"name"_, "age"_>(john);
+
+    std::cout << name << ": " << age << "\n";
+    
+    std::apply(
+      [](auto name, auto age) { std::cout << name << ": " << age << "\n"; },
+      mitama::select<"name"_, "age"_>(john));
+  }
+  
+  { // tagged union
+    using test = mitama::union_type
+                 < mitama::named<"0"_, int>
+                 , mitama::named<"1"_, char>
+                 >;
+
+    test x{ "0"_ % 0 };
+
+    x >> mitama::match {
+      "0"_then --> [](auto x) { std::cout << x << '\n'; },
+      "1"_then --> [](auto x) { std::cout << x << '\n'; },
+    };
   }
 
-  { // Extensible Records
-    auto john = mitama::record{
-      "id"_ << 1234,
-      "name"_ << "John"s,
+  { // Named: initialization
+    { mitama::named<"a"_, int>( 42 ); }
+    { mitama::named<"a"_, int>{ 42 }; }
+    // named<"a"_, int> _ = 42;     // ERROR: cannot convert to `named<_, T>` from `T`
+    // named<"a"_, int> _ = { 42 }; // ERROR: cannot use an explicit constructor in copy-list-initialization
+    { mitama::named<"a"_, std::vector<int>> _{ 1, 2 }; }
+    { mitama::named<"a"_, std::vector<int>> _{ { 1,2,3 }, std::allocator<int>{} }; }
+    { mitama::named<"a"_, int> _ = "a"_ % 42; }
+  }
+
+  {
+    // deduction-guides
+    auto john = mitama::record {
+      "id"_   % 1234,
+      "name"_ % "John"s,
     };
+    
+    // field refinement
+    mitama::has<"id"_, "name"_> auto person = john;
 
-    auto fn1 = [](mitama::has<"id"_, "name"_> auto person) {
-      std::cout << std::format("{}: {}", person["id"_], person["name"_]) << std::endl;
-    };
+    // accessor
+    std::cout << person["id"_] << ", " << person["name"_] << "\n";
 
-    fn1(john);
-
+    // field spreading
     using person_t = decltype(john);
     using new_person_t = person_t::spread<mitama::named<"phone_number"_, std::string>>;
 
-    new_person_t tom {
-      "id"_   << 1234,
-      "name"_ << "Tom"s,
-      "phone_number"_ << "123-4567-8910"s,
-    };
-
-    auto fn2 = [](mitama::has<"phone_number"_> auto person) {
-      std::cout << std::format("phone_number: {}", person["phone_number"_]) << std::endl;
-    };
-
-    fn2(tom);
-
+    // filed shrinking
     using old_person_t = new_person_t::shrink<"phone_number"_>;
     static_assert(std::same_as<person_t, old_person_t>);
-
-    [](mitama::records auto&&){}(tom);
-  }
-  {
-    using Person = mitama::record_type
-                   < mitama::named<"id"_,   int>
-                   , mitama::named<"name"_, std::string>
-                   >;
-
-    Person _ = mitama::empty
-             | "id"_   << 1234
-             | "name"_ << "John"s
-             ;
   }
 }
 

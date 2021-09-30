@@ -8,6 +8,7 @@ module;
 #include <utility>
 #include <variant>
 export module Mitama.Data.Extensible.Record:Internal;
+import Mitama.Utility.Extensible;
 import Mitama.Data.Extensible.Named;
 import Mitama.Data.Extensible.StaticString;
 import Mitama.Data.Extensible.TypeList;
@@ -77,4 +78,12 @@ export namespace mitama {
 
   template <class List, static_string ...ToRemove>
   using erased = difference<List, type_list<>, named<ToRemove>...>::type;
+
+  template <class First, class Second>
+  concept equivalent_to = []<class ...L, class ...R>(type_list<L...>, type_list<R...>){
+    if constexpr (sizeof...(L) != sizeof...(R)) return false;
+    else {
+      return ((L::str == R::str) && ...);
+    }
+  }(default_v<First>, default_v<Second>);
 }

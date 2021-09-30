@@ -4,11 +4,13 @@ module;
 #include <functional>
 #include <memory>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 export module Mitama.Data.Extensible.Named;
+import Mitama.Concepts.Extensible;
 import Mitama.Functional.Extensible;
-import Mitama.Data.Extensible.Into;
+import Mitama.Utility.Extensible;
 import Mitama.Data.Extensible.StaticString;
 import Mitama.Data.Extensible.TypeList;
 import :Storage;
@@ -21,6 +23,7 @@ export namespace mitama {
   public:
     static constexpr std::string_view str = decltype(Tag)::value;
     static constexpr static_string tag = Tag;
+    using value_type = T;
 
     constexpr named() = delete;
     constexpr named(named const&) = default;
@@ -28,19 +31,27 @@ export namespace mitama {
     constexpr named& operator=(named const&) = default;
     constexpr named& operator=(named&&) = default;
 
-    // basic constructor (for direct init)
-    template <class U> requires std::constructible_from<T, U>
-    constexpr explicit(!std::is_convertible_v<U, T>)
-    named(U&& from)
-      noexcept(std::is_nothrow_constructible_v<T, U>)
-      : named_storage<T>{ std::forward<U>(from) }
+    template <class ...Args> requires std::constructible_from<T, Args...>
+    constexpr explicit named(Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>)
+      : named_storage<T>{ std::forward<Args>(args)... }
     {}
 
-    // in place constructor
-    template <class ...Args> requires std::constructible_from<T, Args...>
-    constexpr named(into_<Tag, Args...> into)
-      noexcept(std::is_nothrow_constructible_v<T, Args...>)
-      : named_storage<T>{ into.args }
+    template <class U, class ...Args> requires
+      std::constructible_from<T, std::initializer_list<U>, Args...>
+    constexpr explicit named(std::initializer_list<U> il, Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>, Args...>)
+      : named_storage<T>{ il, std::forward<Args>(args)... }
+    {}
+
+    template <auto Id, class U>
+      requires (std::constructible_from<T, U>
+            && (not std::is_same_v<decltype(Id), decltype(Tag)>)
+            && (decltype(Tag)::value == decltype(Id)::value))
+    constexpr explicit(!std::is_convertible_v<U, T>)
+    named(named<Id, U> from)
+      noexcept(std::is_nothrow_constructible_v<T, U>)
+      : named_storage<T>{ from.value() }
     {}
 
     // accessors
@@ -65,7 +76,8 @@ export namespace mitama {
 
   protected:
     // for records
-    constexpr auto operator[](decltype(Tag)) const noexcept -> T {
+    template <auto S> requires (static_string<S>::value == str)
+    constexpr auto operator[](static_string<S>) const noexcept -> T {
       return storage::deref();
     }
   };
@@ -89,7 +101,19 @@ export namespace mitama {
   //    ```
   //    -- end example ]
   template <auto S, class T>
-  constexpr auto operator<<(static_string<S>, T&& x) noexcept {
+  constexpr auto operator%(static_string<S>, T&& x) noexcept {
     return named<default_v<static_string<S>>, T>{ std::forward<T>(x) };
+  }
+
+  template <auto S1, auto S2, class T1, class T2>
+  constexpr auto operator+=(named<S1, T1> const& fst, named<S2, T2> const& snd) {
+    return std::tuple{ fst, snd };
+  }
+
+  template <auto S, class T, class ...Tail>
+  constexpr auto operator+=(named<S, T> const& fst, std::tuple<Tail...> tail) {
+    return std::apply([&](auto&&... tail) {
+      return std::tuple{fst, std::forward<decltype(tail)>(tail)...};
+    }, tail);
   }
 }

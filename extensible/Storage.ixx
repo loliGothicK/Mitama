@@ -28,24 +28,13 @@ namespace mitama {
       : value(std::forward<Args>(args)...)
     {}
 
-    // delegating constructor for in place construction
-    template <class ...Args>
+    template <class U, class ...Args>
     requires std::constructible_from<T, Args...>
-      constexpr explicit named_storage(std::tuple<Args...> into)
-      noexcept(std::is_nothrow_constructible_v<T, Args...>)
-      : named_storage{ into, std::index_sequence_for<Args...>{} }
+      constexpr explicit named_storage(std::initializer_list<U> il, Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>, Args...>)
+      : value( il, std::forward<Args>(args)... )
     {}
 
-  private:
-    // called between delegating constructor and basic constructor
-    template <class ...Args, std::size_t ...Indices>
-    requires std::constructible_from<T, Args...>
-      constexpr explicit named_storage(std::tuple<Args...> into, std::index_sequence<Indices...>)
-      noexcept(std::is_nothrow_constructible_v<T, Args...>)
-      : named_storage{ std::get<Indices>(into)... }
-    {}
-
-  public:
     constexpr decltype(auto) deref()& { return value; }
     constexpr decltype(auto) deref() const& { return value; }
 
