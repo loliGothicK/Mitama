@@ -30,38 +30,38 @@ export namespace mitama {
 
     // basic constructor (for direct init)
     template <class U> requires std::constructible_from<T, U>
-      constexpr explicit(!std::is_convertible_v<U, T>)
-        named(U&& from)
-        noexcept(std::is_nothrow_constructible_v<T, U>)
-        : named_storage<T>{ std::forward<U>(from) }
-      {}
+    constexpr explicit(!std::is_convertible_v<U, T>)
+    named(U&& from)
+      noexcept(std::is_nothrow_constructible_v<T, U>)
+      : named_storage<T>{ std::forward<U>(from) }
+    {}
 
-      // in place constructor
-      template <class ...Args> requires std::constructible_from<T, Args...>
-        constexpr named(into_<Tag, Args...> into)
-          noexcept(std::is_nothrow_constructible_v<T, Args...>)
-          : named_storage<T>{ into.args }
-        {}
+    // in place constructor
+    template <class ...Args> requires std::constructible_from<T, Args...>
+    constexpr named(into_<Tag, Args...> into)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>)
+      : named_storage<T>{ into.args }
+    {}
 
-        // accessors
-        constexpr decltype(auto) value()& { return storage::deref(); }
-        constexpr decltype(auto) value() const& { return storage::deref(); }
+    // accessors
+    constexpr decltype(auto) value()& { return storage::deref(); }
+    constexpr decltype(auto) value() const& { return storage::deref(); }
 
-        // dereference
-        constexpr auto operator*() -> T {
-          return storage::deref();
-        }
+    // dereference
+    constexpr auto operator*() -> T {
+      return storage::deref();
+    }
 
-        // indirections
-        auto operator->() & -> std::decay_t<T>* {
-          return storage::indirect();
-        }
-        auto operator->() const& -> std::decay_t<T> const* {
-          return storage::indirect();
-        }
+    // indirections
+    auto operator->() & -> std::decay_t<T>* {
+      return storage::indirect();
+    }
+    auto operator->() const& -> std::decay_t<T> const* {
+      return storage::indirect();
+    }
 
-        // clone
-        constexpr auto clone() const { return *this; }
+    // clone
+    constexpr auto clone() const { return *this; }
 
   protected:
     // for records

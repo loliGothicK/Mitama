@@ -65,7 +65,7 @@ export namespace mitama {
     template <std::size_t ...Indices, class ...Args>
     constexpr explicit record(std::index_sequence<Indices...>, std::tuple<Args...> args)
       noexcept((noexcept(Named{ std::get<Indices>(args) }) && ...))
-      : Named{ std::get<Indices>(args) }...
+      : Named( std::get<Indices>(args) )...
     {}
   public:
     static constexpr std::array tags = { Named::str... };
