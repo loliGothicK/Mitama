@@ -41,7 +41,14 @@ int main() {
       mitama::select<"name"_, "age"_>(john));
   }
   
-  { // tagged union
+  { // tagged union:
+    //
+    //!```rust
+    //! enum Test {
+    //!   Zero(int),
+    //!   One(char),
+    //! }
+    //!```
     using test = mitama::union_type
                  < mitama::named<"0"_, int>
                  , mitama::named<"1"_, char>
@@ -49,10 +56,13 @@ int main() {
 
     test x{ "0"_ % 0 };
 
-    x >> mitama::match {
-      "0"_then --> [](auto x) { std::cout << x << '\n'; },
-      "1"_then --> [](auto x) { std::cout << x << '\n'; },
+    // match expression ???
+    auto v = match<int>(x) >>= mitama::with {
+      "0"_then --> [](auto x) { return x; },
+      "1"_then --> [](auto x) { return x; },
     };
+
+    std::cout << v << '\n';
   }
 
   { // Named: initialization

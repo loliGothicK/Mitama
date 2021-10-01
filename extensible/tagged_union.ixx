@@ -6,9 +6,11 @@ export module Mitama.Data.Extensible.ADT;
 export import Mitama.Data.Extensible.Named;
 import Mitama.Data.Extensible.StaticString;
 import Mitama.Data.Extensible.TypeList;
+import Mitama.Concepts.Extensible;
 import Mitama.Functional.Extensible;
 import Mitama.Utility.Extensible;
 
+// index reverse computer
 namespace mitama {
   template <auto, std::size_t, class...>
   struct index_of_impl;
@@ -31,6 +33,7 @@ namespace mitama {
 
 export namespace mitama {
 
+  // value wrapper
   template <std::size_t I, class T>
   struct indexed {
     T value;
@@ -39,6 +42,7 @@ export namespace mitama {
   template <class, class...>
   class tagged_union;
 
+  // tagged union
   template <std::size_t ...Index, class... Named>
   class tagged_union<std::index_sequence<Index...>, Named...> {
     std::variant<indexed<Index, typename Named::value_type>...> storage;
@@ -53,52 +57,80 @@ export namespace mitama {
     template <auto Tag>
     using type_of = list_element_t<index_of<Tag>, type_list<typename Named::value_type...>>;
 
-
     template <auto S, class T>
     tagged_union(named<S, T> x)
       : storage{ std::in_place_index<index_of<S>>, x.value() }
     {}
 
+    template <class Ret = void>
     constexpr auto visit(auto&&... fn) const {
-      return std::visit([&]<std::size_t I, class T>(indexed<I, T> x) -> void {
-        std::invoke(
-          boost::hana::overload_linearly(std::forward<decltype(fn)>(fn)...),
-          default_v<named<tag_v<I>>>, x.value
-        );
+      return std::visit([&]<std::size_t I, class T>(indexed<I, T> x) -> Ret {
+        if constexpr (std::is_void_v<Ret>) {
+          std::invoke(
+            boost::hana::overload_linearly(std::forward<decltype(fn)>(fn)...),
+            default_v<named<tag_v<I>>>, x.value
+          );
+        }
+        else {
+          return static_cast<Ret>(std::invoke(
+            boost::hana::overload_linearly(std::forward<decltype(fn)>(fn)...),
+            default_v<named<tag_v<I>>>, x.value
+          ));
+        }
       }, this->storage);
     }
   };
 
   template <class ...Named>
   using union_type = tagged_union<std::index_sequence_for<Named...>, Named...>;
+}
+
+export namespace mitama {
+  template <class Ret, class TaggedUnion>
+  struct inspector {
+    TaggedUnion tu;
+
+    template <class... Fn>
+    auto inspect(Fn&&... fn) -> Ret {
+      if constexpr (std::is_void_v<Ret>) {
+        tu.visit<Ret>(std::forward<Fn>(fn)...);
+      }
+      else {
+        return tu.visit<Ret>(std::forward<Fn>(fn)...);
+      }
+    }
+  };
+
+  template <class Ret = void, class TU>
+  auto match(TU&& tu) {
+    return inspector<Ret, TU>(std::forward<TU>(tu));
+  }
 
   template <class ...Fn>
-  class match {
+  class with {
     std::tuple<Fn...> fn;
   public:
     template <class... F>
-    constexpr explicit match(F&&... fs) : fn{ std::forward<F>(fs)... } {}
+    constexpr explicit with(F&&... fs) : fn{ std::forward<F>(fs)... } {}
 
-    template <class _, class ...Named>
-    constexpr auto apply(tagged_union<_, Named...> const& tu) const {
+    constexpr auto apply(auto&& inspector) const {
       return std::apply([&](auto&&... fn) {
-        return tu.visit(std::forward<decltype(fn)>(fn)...);
+        return inspector.inspect(std::forward<decltype(fn)>(fn)...);
       }, fn);
     }
   };
 
-  template <class ...Fn> match(Fn&&...) -> match<Fn...>;
+  template <class ...Fn> with(Fn&&...) -> with<Fn...>;
 
-  template <class _, class... Named, class... Fn>
-  inline constexpr auto operator>>(tagged_union<_, Named...> tu, match<Fn...> match_expr) {
-    return match_expr.apply(tu);
+  inline constexpr auto operator>>=(auto&& inspector, kind<of<with>> auto&& with) {
+    return with.apply(inspector);
   }
 
   template <auto Case, class F>
   struct case_fn {
     F fn;
 
-    template <auto S, class ...Args>
+    template <auto S, class ...Args> requires (decltype(Case)::value == named<S>::str)
     constexpr auto operator()(named<S>, Args&&... args) const {
       return std::invoke(fn, std::forward<Args>(args)...);
     }
@@ -117,7 +149,7 @@ export namespace mitama {
   }
 }
 
-export namespace mitama:: inline literals:: inline match_literals{
+export namespace mitama:: inline literals:: inline with_literals{
   template <fixed_storage S>
   inline constexpr auto operator ""_then() noexcept {
     return case_tag<default_v<static_string<S>>>{};
