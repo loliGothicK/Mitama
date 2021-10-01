@@ -58,8 +58,8 @@ int main() {
 
     // match expression ???
     auto v = match(x) >>= mitama::with {
-      "0"_then --> [](auto x) { return x; },
       "1"_then --> [](auto x) { return x; },
+      "0"_then --> [](auto x) { return x; },
     };
 
     std::cout << v << '\n';

@@ -65,12 +65,12 @@ export namespace mitama {
     {}
 
     template <class Ret = deduction, class... Fn>
-      requires (std::is_invocable_r_v<Ret, Fn, named<tag_v<Index>>, type_of<tag_v<Index>>> && ...)
+      requires (std::is_invocable_r_v<Ret, Fn, named<std::decay_t<Fn>::tag>, type_of<std::decay_t<Fn>::tag>> && ...)
     constexpr auto inspect(Fn&&... fn) const {
       return std::visit([&]<std::size_t I, class T>(indexed<I, T> x) {
         if constexpr (std::same_as<Ret, deduction>) {
           using type = std::common_reference_t<
-            std::invoke_result_t< Fn, named<tag_v<Index>>, type_of<tag_v<Index>> >...
+            std::invoke_result_t< Fn, named<std::decay_t<Fn>::tag>, type_of<std::decay_t<Fn>::tag> >...
           >;
           return static_cast<type>(std::invoke(
             boost::hana::overload_linearly(std::forward<decltype(fn)>(fn)...),
@@ -134,6 +134,7 @@ export namespace mitama {
 
   template <auto Case, class F>
   struct case_fn {
+    static constexpr auto tag = Case;
     F fn;
 
     template <auto S, class ...Args> requires (decltype(Case)::value == named<S>::str)
