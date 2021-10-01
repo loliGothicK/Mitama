@@ -57,7 +57,7 @@ int main() {
     test x{ "0"_ % 0 };
 
     // match expression ???
-    auto v = match<int>(x) >>= mitama::with {
+    auto v = match(x) >>= mitama::with {
       "0"_then --> [](auto x) { return x; },
       "1"_then --> [](auto x) { return x; },
     };

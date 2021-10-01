@@ -49,7 +49,9 @@ export namespace mitama {
 
     template <std::size_t I>
     static constexpr auto tag_v = default_v<list_element_t<I, type_list<decltype(Named::tag)...>>>;
-
+    struct deduction {
+      constexpr deduction(auto&&...) noexcept {}
+    };
   public:
     template <auto Tag>
     static constexpr std::size_t index_of = ::mitama::index_of<Tag, Named...>;
@@ -62,14 +64,18 @@ export namespace mitama {
       : storage{ std::in_place_index<index_of<S>>, x.value() }
     {}
 
-    template <class Ret = void>
-    constexpr auto visit(auto&&... fn) const {
-      return std::visit([&]<std::size_t I, class T>(indexed<I, T> x) -> Ret {
-        if constexpr (std::is_void_v<Ret>) {
-          std::invoke(
+    template <class Ret = deduction, class... Fn>
+      requires (std::is_invocable_r_v<Ret, Fn, named<tag_v<Index>>, type_of<tag_v<Index>>> && ...)
+    constexpr auto inspect(Fn&&... fn) const {
+      return std::visit([&]<std::size_t I, class T>(indexed<I, T> x) {
+        if constexpr (std::same_as<Ret, deduction>) {
+          using type = std::common_reference_t<
+            std::invoke_result_t< Fn, named<tag_v<Index>>, type_of<tag_v<Index>> >...
+          >;
+          return static_cast<type>(std::invoke(
             boost::hana::overload_linearly(std::forward<decltype(fn)>(fn)...),
             default_v<named<tag_v<I>>>, x.value
-          );
+          ));
         }
         else {
           return static_cast<Ret>(std::invoke(
@@ -91,12 +97,12 @@ export namespace mitama {
     TaggedUnion tu;
 
     template <class... Fn>
-    auto inspect(Fn&&... fn) -> Ret {
+    auto inspect(Fn&&... fn) {
       if constexpr (std::is_void_v<Ret>) {
-        tu.visit<Ret>(std::forward<Fn>(fn)...);
+        return tu.inspect(std::forward<Fn>(fn)...);
       }
       else {
-        return tu.visit<Ret>(std::forward<Fn>(fn)...);
+        return tu.inspect<Ret>(std::forward<Fn>(fn)...);
       }
     }
   };
