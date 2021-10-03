@@ -59,25 +59,28 @@ export namespace mitama {
   template <class ...Named>
   using sorted = sort<std::index_sequence_for<Named...>, Named...>::type;
 
-  template <class, class, class ...>
-  struct difference;
+  template <class, class, class>
+  struct difference_impl;
 
   template <class Head, class ...Tail, class... Result, class ...ToRemove>
-  struct difference<type_list<Head, Tail...>, type_list<Result...>, ToRemove...> {
+  struct difference_impl<type_list<Head, Tail...>, type_list<ToRemove...>, type_list<Result...>> {
     using type = std::conditional_t<
       ((Head::str == ToRemove::str) || ...),
-      typename difference<type_list<Tail...>, type_list<Result...>, ToRemove...>::type,
-      typename difference<type_list<Tail...>, type_list<Result..., Head>, ToRemove...>::type
+      typename difference_impl<type_list<Tail...>, type_list<ToRemove...>, type_list<Result...>>::type,
+      typename difference_impl<type_list<Tail...>, type_list<ToRemove...>, type_list<Result..., Head>>::type
     >;
   };
 
   template <class... Result, class ...ToRemove>
-  struct difference<type_list<>, type_list<Result...>, ToRemove...> {
+  struct difference_impl<type_list<>, type_list<ToRemove...>, type_list<Result...>> {
     using type = type_list<Result...>;
   };
 
+  template <class Lhs, class Rhs>
+  using difference = difference_impl<Lhs, Rhs, type_list<>>::type;
+
   template <class List, static_string ...ToRemove>
-  using erased = difference<List, type_list<>, named<ToRemove>...>::type;
+  using erased = difference<List, type_list<named<ToRemove>...>>;
 
   template <class First, class Second>
   concept equivalent_to = []<class ...L, class ...R>(type_list<L...>, type_list<R...>){
@@ -86,4 +89,22 @@ export namespace mitama {
       return ((L::str == R::str) && ...);
     }
   }(default_v<First>, default_v<Second>);
+
+  // B Å∫ A
+  template <class, class>
+  struct is_superset_of : std::false_type {};
+
+  template <template <class...> class Record, class... A, class... B>
+  struct is_superset_of<Record<A...>, Record<B...>>
+    : std::conjunction<
+        std::is_same<type_list<>, difference<type_list<B...>, type_list<A...>>>,
+        std::is_convertible<
+          typename Record<A...>::template typeof<B::tag>,
+          typename Record<B...>::template typeof<B::tag>
+        >...
+      >
+  {};
+
+  template <class A, class B>
+  concept superset_of = is_superset_of<std::remove_cvref_t<A>, std::remove_cvref_t<B>>::value;
 }

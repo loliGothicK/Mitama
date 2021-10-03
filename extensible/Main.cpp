@@ -20,11 +20,30 @@ using namespace std::literals;
 int main() {
   {
     // record type declaration
-    using Person = mitama::record_type
+    using Person = mitama::record
                    < mitama::named<"name"_, std::string>
                    , mitama::named<"age"_,  int>
                    >;
+    {
+      // OK
+      Person john = Person{
+          "name"_ % "John"s,
+          "age"_ % 42,
+      };
+      // Also OK
+      Person tom = Person{
+          "age"_ % 42,
+          "name"_ % "Tom"s,
+      };
+    }
 
+    {
+      auto tom = mitama::record{
+          "age"_ % 42,
+          "name"_ % "Tom"s,
+      };
+      Person tom2 = mitama::shrink(tom);
+    }
     // make record
     Person john = mitama::empty
                 += "name"_ % "John"s
@@ -56,10 +75,20 @@ int main() {
 
     test x{ "0"_ % 0 };
 
-    // match expression ???
-    auto v = match(x) >>= mitama::with {
-      "1"_then --> [](auto x) { return x; },
+    //
+    // match expression:
+    // 
+    //  match |target| with {
+    //    match-case...
+    //  }
+    // 
+    // match-case:
+    //   
+    //  pattern | guard --> [](args...){ ... }
+    //
+    auto v = mitama::match |x| mitama::with {
       "0"_then --> [](auto x) { return x; },
+      "1"_then --> [](auto x) { return x; },
     };
 
     std::cout << v << '\n';

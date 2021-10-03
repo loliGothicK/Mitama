@@ -106,10 +106,15 @@ export namespace mitama {
       }
     }
   };
+  
+  template <class T = void>
+  struct match_ {};
 
-  template <class Ret = void, class TU>
-  auto match(TU&& tu) {
-    return inspector<Ret, TU>(std::forward<TU>(tu));
+  inline constexpr match_<> match{};
+
+  template <class Ret, class T>
+  inline constexpr auto operator|(match_<Ret>, T&& target) {
+    return inspector<Ret, T>{ .tu = std::forward<T>(target) };
   }
 
   template <class ...Fn>
@@ -128,7 +133,7 @@ export namespace mitama {
 
   template <class ...Fn> with(Fn&&...) -> with<Fn...>;
 
-  inline constexpr auto operator>>=(auto&& inspector, kind<of<with>> auto&& with) {
+  inline constexpr auto operator|(auto&& inspector, kind<of<with>> auto&& with) {
     return with.apply(inspector);
   }
 

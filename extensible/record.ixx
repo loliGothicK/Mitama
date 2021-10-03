@@ -8,6 +8,7 @@ export import Mitama.Data.Extensible.Named;
 export import Mitama.Data.Extensible.StaticString;
 export module Mitama.Data.Extensible.Record;
 import Mitama.Data.Extensible.TypeList;
+import Mitama.Concepts.Extensible;
 import Mitama.Functional.Extensible;
 import Mitama.Utility.Extensible;
 import :Internal;
@@ -52,15 +53,49 @@ export namespace mitama:: inline where {
   }();
 }
 
+namespace mitama {
+  template <named_any... Rows>
+  requires distinct<Rows...>
+    class record;
+
+  template <class T>
+  struct make_record_impl;
+
+  template <named_any... Rows>
+  struct make_record_impl<type_list<Rows...>>
+    : std::type_identity<record<Rows...>>
+  {};
+
+  template <class List>
+  using make_record = make_record_impl<List>::type;
+}
+
 // Extensible Records
 export namespace mitama {
-  template <class = type_list<>, class = type_list<>>
+  template <named_any ...Rows>
+    requires distinct<Rows...>
   class record;
 
-  template <named_any ...Fields>
-    requires distinct<Fields...>
-  class record<type_list<Fields...>>
-      : protected Fields...
+  template <class Record>
+  class shrink {
+    Record record;
+  public:
+    template <class R>
+    constexpr shrink(R&& r) : record(std::forward<R>(r)) {}
+
+    template <auto S>
+    constexpr decltype(auto) operator[](static_string<S> tag) const {
+      return record[tag];
+    }
+  };
+
+  template <kind<of<record>> Record>
+  shrink(Record&&) -> shrink<Record>;
+
+  template <named_any ...Rows>
+    requires distinct<Rows...>
+  class record
+      : protected Rows...
   {
     template <named_any... From>
     struct FROM: protected From... {
@@ -69,66 +104,66 @@ export namespace mitama {
     };
     template <named_any ...Args>
     constexpr record(FROM<Args...> table)
-      : Fields( table[Fields::tag] )...
+      : Rows( table[Rows::tag] )...
     {}
-
-    using fields = type_list<Fields...>;
-    using sorted = sorted<Fields...>;
 
   public:
     template <named_any ...Args>
-    constexpr record(Args... args): record(FROM<Args...>(std::forward<Args>(args)...)) {}
+    constexpr record(Args... args)
+      : record(FROM<Args...>(std::forward<Args>(args)...))
+    {}
     
+    template <superset_of<record> Record>
+    constexpr record(shrink<Record> other)
+      : Rows(other[Rows::tag])...
+    {}
+
     template <static_string Key>
-    using typeof = decltype(std::declval<FROM<Fields...>>()[Key]);
+    using typeof = decltype(std::declval<FROM<Rows...>>()[Key]);
 
-    using Fields::operator[]...;
+    using Rows::operator[]...;
 
-    // TODO: impl `merge` and use `merge<type_list<Sorted>, sorted<New...>>` instead of `sorted<Sorted..., New...>`
     template <named_any ...New>
-    using spread = record< type_list<Fields..., New...> >;
+    using spread = record<Rows..., New...>;
 
     template <static_string ...Keys>
-    using shrink = record< erased<type_list<Fields...>, Keys...> >;
+    using shrink = make_record<erased<type_list<Rows...>, Keys...>>;
 
     template <named_any Ex>
     constexpr auto operator+=(Ex ex) const {
-      return spread<Ex>(Fields::clone()..., ex);
+      return spread<Ex>(Rows::clone()..., ex);
     }
 
     template <named_any ...Ex>
     constexpr auto operator+=(std::tuple<Ex...> ex) const {
       return std::apply([](auto&& ...ex) {
         return spread<std::remove_cvref_t<Ex>...>{
-          Fields::clone()...,
+          Rows::clone()...,
           std::forward<decltype(ex)>(ex)...
         };
       }, ex);
     }
   };
 
-  template <named_any ...Named>
-  record(Named...) -> record<type_list<Named...>>;
+  template <named_any ...Rows>
+  record(Rows...) -> record<Rows...>;
 
   template <>
-  class record<type_list<>> {};
+  class record<> {};
 
   inline constexpr record<> empty{};
 
-  template <named_any Named>
-  inline constexpr auto operator+=(record<>, Named named) {
+  template <named_any Row>
+  inline constexpr auto operator+=(record<>, Row named) {
     return record{ named };
   }
 
   template <named_any ...Ex>
   constexpr auto operator+=(record<>, std::tuple<Ex...> ex) {
     return std::apply([](auto&& ...ex) {
-      return record<type_list<std::remove_cvref_t<Ex>...>>{ std::forward<decltype(ex)>(ex)... };
+      return record<std::remove_cvref_t<Ex>...>{ std::forward<decltype(ex)>(ex)... };
     }, ex);
   }
-
-  template <named_any ...Named>
-  using record_type = record<type_list<Named...>>;
 
   template <static_string ...S>
   inline constexpr auto select = [](auto&& rec) {
@@ -138,18 +173,10 @@ export namespace mitama {
 
 export namespace mitama:: inline where {
   template <class Record, static_string ...Required>
-  concept has = []<named_any... Fields>(std::type_identity<record<type_list<Fields...>>>) {
+  concept has = []<named_any... Rows>(std::type_identity<record<Rows...>>) {
     return []<named_any... Sorted>(type_list<Sorted...>){
       std::array tags = { Sorted::str... };
       return (std::binary_search(tags.cbegin(), tags.cend(), decltype(Required)::value) && ...);
-    }(sorted<Fields...>());
+    }(sorted<Rows...>());
   }(std::type_identity<Record>());
-
-  template <class Record>
-  concept records = [] {
-    return overloaded{
-      [](...) { return false; },
-      []<class ..._>(std::type_identity<record<type_list<_...>>>) { return true; }
-    }(std::type_identity<std::remove_cvref_t<Record>>());
-  }();
 }

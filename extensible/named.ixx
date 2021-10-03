@@ -75,7 +75,6 @@ export namespace mitama {
     constexpr auto clone() const { return *this; }
 
   protected:
-    // for records
     template <auto S> requires (static_string<S>::value == str)
     constexpr auto operator[](static_string<S>) const noexcept -> T {
       return storage::deref();
