@@ -162,7 +162,7 @@ export namespace mitama {
 }
 
 export namespace mitama:: inline literals:: inline with_literals{
-  template <fixed_storage S>
+  template <fixed_string S>
   inline constexpr auto operator ""_then() noexcept {
     return case_tag<default_v<static_string<S>>>{};
   }

@@ -7,14 +7,14 @@ import Mitama.Utility.Extensible;
 
 export namespace mitama {
   template<std::size_t N, class CharT>
-  struct fixed_storage {
+  struct fixed_string {
     static constexpr std::size_t size = N;
     using char_type = CharT;
 
-    constexpr fixed_storage(CharT const (&s)[N])
-      : fixed_storage(s, std::make_index_sequence<N>{}) {}
+    constexpr fixed_string(CharT const (&s)[N])
+      : fixed_string(s, std::make_index_sequence<N>{}) {}
     template<std::size_t ...Indices>
-    constexpr fixed_storage(CharT const (&s)[N], std::index_sequence<Indices...>)
+    constexpr fixed_string(CharT const (&s)[N], std::index_sequence<Indices...>)
       : s{ s[Indices]... } {}
 
     CharT const s[N];
@@ -24,14 +24,11 @@ export namespace mitama {
 export namespace mitama {
   // non-type template enabled static string class
   // 
-  // S: fixed_storage<N, CharT>
-  template<auto S>
+  // S: fixed_string<N, CharT>
+  template<fixed_string S>
   struct static_string {
-    static constexpr auto storage = S;
     using char_type = typename decltype(S)::char_type;
-
-    static constexpr std::basic_string_view<char_type> const
-      value = { storage.s, decltype(storage)::size };
+    static constexpr std::basic_string_view<char_type> const value = { S.s, decltype(S)::size };
 
     template <auto T>
     requires std::same_as<char_type, typename static_string<T>::char_type>
@@ -47,7 +44,7 @@ export namespace mitama {
 
 export namespace mitama:: inline literals:: inline static_string_literals{
   // static string literal
-  template<fixed_storage S>
+  template<fixed_string S>
   inline constexpr static_string<S> operator""_() {
     return {};
   }

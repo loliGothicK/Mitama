@@ -24,16 +24,20 @@ export namespace mitama {
   template <class ...Named>
   constexpr auto sorted_indices = []<std::size_t ...Indices>(std::index_sequence<Indices...>) {
     using boxed_index = std::variant<std::integral_constant<std::size_t, Indices>...>;
-    static_assert(!!sizeof...(Named));
-    std::array arr{ boxed_index{std::in_place_index<Indices>}... };
-    auto key = [](boxed_index boxed) {
-      return std::visit([](auto i) {
-        return std::remove_cvref_t<list_element_t<decltype(i)::value, type_list<Named...>>>::str;
+    if constexpr (sizeof...(Named) == 0) {
+      return boxed_index{};
+    } 
+    else {
+      std::array arr{ boxed_index{std::in_place_index<Indices>}... };
+      auto key = [](boxed_index boxed) {
+        return std::visit([](auto i) {
+          return list_element_t<decltype(i)::value, type_list<Named...>>::str;
         }, boxed);
-    };
-    auto cmp = [key](auto lhs, auto rhs) { return key(lhs) < key(rhs); };
-    std::sort(arr.begin(), arr.end(), cmp);
-    return arr;
+      };
+      auto cmp = [key](auto lhs, auto rhs) { return key(lhs) < key(rhs); };
+      std::sort(arr.begin(), arr.end(), cmp);
+      return arr;
+    }
   }(std::index_sequence_for<Named...>{});
 
   template <class, class...>
@@ -76,8 +80,9 @@ export namespace mitama {
     using type = type_list<Result...>;
   };
 
-  template <class Lhs, class Rhs>
-  using difference = difference_impl<Lhs, Rhs, type_list<>>::type;
+  // A\B
+  template <class A, class B>
+  using difference = difference_impl<A, B, type_list<>>::type;
 
   template <class List, static_string ...ToRemove>
   using erased = difference<List, type_list<named<ToRemove>...>>;
@@ -88,9 +93,8 @@ export namespace mitama {
     else {
       return ((L::str == R::str) && ...);
     }
-  }(default_v<First>, default_v<Second>);
+  }(default_v<sorted<First>>, default_v<sorted<Second>>);
 
-  // B Å∫ A
   template <class, class>
   struct is_superset_of : std::false_type {};
 
@@ -105,6 +109,7 @@ export namespace mitama {
       >
   {};
 
+  // B Å∫ A
   template <class A, class B>
   concept superset_of = is_superset_of<std::remove_cvref_t<A>, std::remove_cvref_t<B>>::value;
 }
