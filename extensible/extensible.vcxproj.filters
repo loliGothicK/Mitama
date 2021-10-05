@@ -66,8 +66,11 @@
     <ClCompile Include="Concepts.ixx">
       <Filter>Header Files\Extensible\Concepts</Filter>
     </ClCompile>
-    <ClCompile Include="tagged_union.ixx">
+    <ClCompile Include="match_expression.ixx">
       <Filter>Header Files\Extensible\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="lambda.ixx">
+      <Filter>Header Files\Extensible\Functional</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

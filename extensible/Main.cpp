@@ -5,7 +5,8 @@
 ///
 
 import Mitama.Data.Extensible.Record;
-import Mitama.Data.Extensible.ADT;
+import Mitama.Functional.Extensible.Match;
+import Mitama.Functional.Extensible.Lambda;
 #include <iostream>
 #include <format>
 #include <map>
@@ -18,6 +19,7 @@ using namespace mitama::literals;
 using namespace std::literals;
 
 int main() {
+  using mitama::as;
   {
     // record type declaration
     using Person = mitama::record
@@ -27,27 +29,27 @@ int main() {
     {
       // OK
       Person john = Person{
-          "name"_ % "John"s,
-          "age"_ % 42,
+          as<"name"_>("John"s),
+          as<"age"_>(42),
       };
       // Also OK
       Person tom = Person{
-          "age"_ % 42,
-          "name"_ % "Tom"s,
+          as<"age"_>(42),
+          as<"name"_>("Tom"s),
       };
     }
 
     {
       auto tom = mitama::record{
-          "age"_ % 42,
-          "name"_ % "Tom"s,
+          as<"age"_>(42),
+          as<"name"_>("Tom"s),
       };
       Person tom2 = mitama::shrink(tom);
     }
     // make record
     Person john = mitama::empty
-                += "name"_ % "John"s
-                += "age"_  % 42
+                += as<"name"_>("John"s)
+                += as<"age"_>(42)
                 ;
     
     // field select and structured binding
@@ -60,38 +62,38 @@ int main() {
       mitama::select<"name"_, "age"_>(john));
   }
   
-  { // tagged union:
-    //
-    //!```rust
-    //! enum Test {
-    //!   Zero(int),
-    //!   One(char),
-    //! }
-    //!```
-    using test = mitama::union_type
-                 < mitama::named<"0"_, int>
-                 , mitama::named<"1"_, char>
-                 >;
-
-    test x{ "0"_ % 0 };
-
-    //
-    // match expression:
-    // 
-    //  match |target| with {
-    //    match-case...
+  {
+    //  match |expr| with {
+    //    match-arms...
     //  }
     // 
-    // match-case:
+    // match-arm:
     //   
-    //  pattern | guard --> [](args...){ ... }
+    //  - when(value) --> match-arm-body
+    // 
+    //  - when(placeholder)[guard-function] --> match-arm-body
+    //                     ^~~~~~~~~~~~~~~~
+    //                      (optional)
     //
-    auto v = mitama::match |x| mitama::with {
-      "0"_then --> [](auto x) { return x; },
-      "1"_then --> [](auto x) { return x; },
+    // match-arm-body:
+    //  If the match expression `match |expr: T| with {...}` returns a value type of `R`,
+    //  then `match-arm-body: Body` must satisfy one of the following conditions:
+    // 
+    //  - requires (kind<of<lambda>> body, has_rows<{placeholder}> record) { { body(record); } -> std::convertible_to<R>; }
+    //  - requires (Body body, T arg) { { std::invoke(body, arg); } -> std::convertible_to<R>; }
+    //  - requires (Body body) { { std::invoke(body); } -> std::convertible_to<R>; }
+    //  - std::convertible_to<Body, R>
+    // 
+    using namespace mitama::match_expr::prelude;
+
+    auto v = match |1+2| with {
+      when("x"_)["x"_ % 2 == 0] --> 4,
+      when("x"_) --> [] (auto x) { return 42; },
+      when("x"_) --> [] { return 42; },
+      when("x"_) --> ("x"_ * 42),
     };
 
-    std::cout << v << '\n';
+    std::cout << v << std::endl;
   }
 
   { // Named: initialization
@@ -101,18 +103,18 @@ int main() {
     // named<"a"_, int> _ = { 42 }; // ERROR: cannot use an explicit constructor in copy-list-initialization
     { mitama::named<"a"_, std::vector<int>> _{ 1, 2 }; }
     { mitama::named<"a"_, std::vector<int>> _{ { 1,2,3 }, std::allocator<int>{} }; }
-    { mitama::named<"a"_, int> _ = "a"_ % 42; }
+    { mitama::named<"a"_, int> _ = as<"a"_>(42); }
   }
 
   {
     // deduction-guides
     auto john = mitama::record {
-      "id"_   % 1234,
-      "name"_ % "John"s,
+      as<"id"_>(1234),
+      as<"name"_>("John"s),
     };
     
     // field refinement
-    mitama::has<"id"_, "name"_> auto person = john;
+    mitama::has_rows<"id"_, "name"_> auto person = john;
 
     // accessor
     std::cout << person["id"_] << ", " << person["name"_] << "\n";

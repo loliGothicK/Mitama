@@ -143,7 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="tagged_union.ixx" />
+    <ClCompile Include="lambda.ixx" />
+    <ClCompile Include="match_expression.ixx" />
     <ClCompile Include="concepts.ixx" />
     <ClCompile Include="prelude.ixx" />
     <ClCompile Include="functional.ixx" />

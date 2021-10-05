@@ -173,7 +173,7 @@ export namespace mitama {
 
 export namespace mitama:: inline where {
   template <class Record, static_string ...Required>
-  concept has = []<named_any... Rows>(std::type_identity<record<Rows...>>) {
+  concept has_rows = []<named_any... Rows>(std::type_identity<record<Rows...>>) {
     return []<named_any... Sorted>(type_list<Sorted...>){
       std::array tags = { Sorted::str... };
       return (std::binary_search(tags.cbegin(), tags.cend(), decltype(Required)::value) && ...);

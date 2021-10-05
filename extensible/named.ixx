@@ -76,7 +76,7 @@ export namespace mitama {
 
   protected:
     template <auto S> requires (static_string<S>::value == str)
-    constexpr auto operator[](static_string<S>) const noexcept -> T {
+    constexpr decltype(auto) operator[](static_string<S>) const noexcept {
       return storage::deref();
     }
   };
@@ -96,13 +96,11 @@ export namespace mitama {
   // Overloading to make it easier to build `named`.
   // [ Example:
   //    ```cpp
-  //    named<"id"_, int> id = "id"_ <= 42; 
+  //    named<"id"_, int> id = as<"id"_>(42); 
   //    ```
   //    -- end example ]
-  template <auto S, class T>
-  constexpr auto operator%(static_string<S>, T&& x) noexcept {
-    return named<default_v<static_string<S>>, T>{ std::forward<T>(x) };
-  }
+  template <static_string S, class T>
+  inline constexpr auto as(T&& x) { return named<S, T>{ std::forward<T>(x) }; }
 
   template <auto S1, auto S2, class T1, class T2>
   constexpr auto operator+=(named<S1, T1> const& fst, named<S2, T2> const& snd) {

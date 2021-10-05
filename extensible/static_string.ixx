@@ -5,7 +5,7 @@ module;
 export module Mitama.Data.Extensible.StaticString;
 import Mitama.Utility.Extensible;
 
-export namespace mitama {
+namespace mitama {
   template<std::size_t N, class CharT>
   struct fixed_string {
     static constexpr std::size_t size = N;
@@ -40,6 +40,14 @@ export namespace mitama {
       return value;
     }
   };
+}
+
+namespace mitama {
+  template <class T> struct is_static_str : std::false_type {};
+  template <auto S> struct is_static_str<static_string<S>>: std::true_type {};
+
+  export template <class T>
+  concept static_strings = is_static_str<std::remove_cvref_t<T>>::value;
 }
 
 export namespace mitama:: inline literals:: inline static_string_literals{
