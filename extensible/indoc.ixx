@@ -8,7 +8,7 @@ module;
 export module Mitama.Utility.Extensible.Indoc;
 
 export namespace mitama {
-  auto indoc(std::string_view input) -> std::string {
+  inline constexpr auto indoc(std::string_view input) -> std::string {
     size_t pos = 0;
     std::string_view text = input;
     std::vector<std::string_view> lines{};
@@ -19,7 +19,7 @@ export namespace mitama {
     }
     auto nonEmpty = lines | std::views::filter([](auto line) { return not line.empty(); });
     auto x = std::ranges::min(nonEmpty | std::views::transform([](auto line) {
-      auto pos = std::ranges::find_if_not(line, [](auto c) { return std::isspace(c); });
+      auto pos = std::ranges::find_if_not(line, [](auto c) { return c == ' '; });
       return std::ranges::distance(line.begin(), pos);
     }));
     auto removed = lines | std::views::transform([&](auto line) {
