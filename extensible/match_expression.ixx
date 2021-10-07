@@ -102,14 +102,42 @@ export namespace mitama {
     When _when;
     Guard _guard;
 
-    template <class T>    constexpr auto match(T&& actual) const -> bool {      return _when.match(actual) && _guard(_when.make_record(actual));    }    constexpr auto operator--(int) && -> guard_ {
+    template <class T>
+    constexpr auto match(T&& actual) const -> bool {
+      return _when.match(actual) && _guard(_when.make_record(actual));
+    }
+
+    constexpr auto operator--(int) && -> guard_ {
       return *this;
     }
   };
 
   template <class... Values>
   struct when_ {
-    std::tuple<Values...> expected;    template <class T>    constexpr auto make_record(T&& actual) const {      if constexpr (static_strings<std::tuple_element_t<0, std::tuple<Values...>>>) {        return mitama::empty += as<std::tuple_element_t<0, std::tuple<Values...>>{}>(actual);      }      else {        return mitama::empty;      }    }    template <class T>    constexpr auto match(T&& actual) const -> bool {      return std::apply([&actual]<class... Ts>(Ts&&... expected) {        if constexpr (static_strings<std::tuple_element_t<0, std::tuple<Values...>>>) {          return true;        }        else {          return ((expected == actual) || ...);        }      }, expected);    }
+    std::tuple<Values...> expected;
+
+    template <class T>
+    constexpr auto make_record(T&& actual) const {
+      if constexpr (static_strings<std::tuple_element_t<0, std::tuple<Values...>>>) {
+        return mitama::empty += as<std::tuple_element_t<0, std::tuple<Values...>>{}>(actual);
+      }
+      else {
+        return mitama::empty;
+      }
+    }
+
+    template <class T>
+    constexpr auto match(T&& actual) const -> bool {
+      return std::apply([&actual]<class... Ts>(Ts&&... expected) {
+        if constexpr (static_strings<std::tuple_element_t<0, std::tuple<Values...>>>) {
+          return true;
+        }
+        else {
+          return ((expected == actual) || ...);
+        }
+      }, expected);
+    }
+
     template <class Guard, class ...Values>
     inline constexpr auto operator[](Guard guard_fn) {
       return guard_<when_, Guard>{*this, guard_fn};

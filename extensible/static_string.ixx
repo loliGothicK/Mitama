@@ -27,12 +27,14 @@ export namespace mitama {
   }
 }
 
-template <std::size_t N, class CharT>
-struct std::formatter<mitama::fixed_string<N, CharT>> : std::formatter<const CharT *> {
-  auto format(mitama::fixed_string<N, CharT> fs, format_context& ctx) {
-    return formatter<const CharT*>::format(fs.s, ctx);
-  }
-};
+export namespace std {
+  template <std::size_t N, class CharT>
+  struct formatter<mitama::fixed_string<N, CharT>> : formatter<const CharT*> {
+    auto format(mitama::fixed_string<N, CharT> fs, format_context& ctx) {
+      return formatter<const CharT*>::format(fs.s, ctx);
+    }
+  };
+}
 
 export namespace mitama {
   // non-type template enabled static string class
@@ -60,14 +62,16 @@ export namespace mitama {
   }
 }
 
-template <auto S>
-struct std::formatter<mitama::static_string<S>>
-  : std::formatter<std::basic_string_view<typename mitama::static_string<S>::char_type>>
-{
-  auto format(mitama::static_string<S>, format_context& ctx) {
-    return formatter<const typename mitama::static_string<S>::char_type*>::format(mitama::static_string<S>::value, ctx);
-  }
-};
+export namespace std {
+  template <auto S>
+  struct formatter<mitama::static_string<S>>
+    : formatter<std::basic_string_view<typename mitama::static_string<S>::char_type>>
+  {
+    auto format(mitama::static_string<S>, format_context& ctx) {
+      return formatter<const typename mitama::static_string<S>::char_type*>::format(mitama::static_string<S>::value, ctx);
+    }
+  };
+}
 
 namespace mitama {
   template <class T> struct is_static_str : std::false_type {};
