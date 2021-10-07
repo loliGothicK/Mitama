@@ -91,6 +91,16 @@ export namespace mitama {
     constexpr std::strong_ordering operator<=>(named<S>) const noexcept {
       return named::str <=> named<S>::str;
     }
+
+    template <class T>
+    constexpr auto operator=(T&& val) const {
+      return named<Tag, T>(std::forward<T>(val));
+    }
+
+    template <class T>
+    constexpr auto operator%(T&& val) const {
+      return named<Tag, T>(std::forward<T>(val));
+    }
   };
 
   // Overloading to make it easier to build `named`.
@@ -112,5 +122,13 @@ export namespace mitama {
     return std::apply([&](auto&&... tail) {
       return std::tuple{fst, std::forward<decltype(tail)>(tail)...};
     }, tail);
+  }
+}
+
+export namespace mitama:: inline literals:: inline static_string_literals {
+  // named variable literal
+  template<fixed_string S>
+  inline constexpr auto operator""_v() {
+    return named<static_string<S>{}>();
   }
 }
