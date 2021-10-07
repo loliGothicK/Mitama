@@ -31,6 +31,15 @@
     <Filter Include="Header Files\Extensible\Concepts">
       <UniqueIdentifier>{ed3deac6-077f-431a-aaf2-63ce4b555816}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Inspector">
+      <UniqueIdentifier>{3d5eb96b-691e-44d5-b8e3-04e39e368ab1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Async">
+      <UniqueIdentifier>{215c8f8f-c733-4412-9c0c-99e658ca1ff1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Extensible\Data\Result">
+      <UniqueIdentifier>{4ad079cc-d369-4bc3-a62d-24a3db83d1ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -66,11 +75,77 @@
     <ClCompile Include="Concepts.ixx">
       <Filter>Header Files\Extensible\Concepts</Filter>
     </ClCompile>
-    <ClCompile Include="match_expression.ixx">
-      <Filter>Header Files\Extensible\Data</Filter>
-    </ClCompile>
     <ClCompile Include="lambda.ixx">
       <Filter>Header Files\Extensible\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector.ixx">
+      <Filter>Header Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="indoc.ixx">
+      <Filter>Header Files\Extensible\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="match_expression.ixx">
+      <Filter>Header Files\Extensible\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="Generator.ixx">
+      <Filter>Header Files\Async</Filter>
+    </ClCompile>
+    <ClCompile Include="Mpsc.ixx">
+      <Filter>Header Files\Async</Filter>
+    </ClCompile>
+    <ClCompile Include="display.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="failure.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="formattable.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="just.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="maybe.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="maybe_def.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="maybe_io.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="nothing.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="panic.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="pipe.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="result.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="result_def.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="result_functional.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="result_io.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="success.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="transpose.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="unwrap.ixx">
+      <Filter>Header Files\Extensible\Data\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="OneShot.ixx">
+      <Filter>Header Files\Async</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
