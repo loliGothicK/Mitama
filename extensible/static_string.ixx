@@ -2,11 +2,12 @@ module;
 #include <cstddef>
 #include <string_view>
 #include <type_traits>
+#include <format>
 export module Mitama.Data.Extensible.StaticString;
 import Mitama.Utility.Extensible;
 
-namespace mitama {
-  template<std::size_t N, class CharT>
+export namespace mitama {
+  template <std::size_t N, class CharT>
   struct fixed_string {
     static constexpr std::size_t size = N;
     using char_type = CharT;
@@ -19,7 +20,19 @@ namespace mitama {
 
     CharT const s[N];
   };
+
+  template <std::size_t N, class CharT>
+  std::ostream& operator<<(std::ostream& os, fixed_string<N, CharT> fs) {
+    return os << fs.s;
+  }
 }
+
+template <std::size_t N, class CharT>
+struct std::formatter<mitama::fixed_string<N, CharT>> : std::formatter<const CharT *> {
+  auto format(mitama::fixed_string<N, CharT> fs, format_context& ctx) {
+    return formatter<const CharT*>::format(fs.s, ctx);
+  }
+};
 
 export namespace mitama {
   // non-type template enabled static string class
@@ -40,7 +53,21 @@ export namespace mitama {
       return value;
     }
   };
+
+  template <auto S>
+  std::ostream& operator<<(std::ostream& os, static_string<S>) {
+    return os << static_string<S>::value;
+  }
 }
+
+template <auto S>
+struct std::formatter<mitama::static_string<S>>
+  : std::formatter<std::basic_string_view<typename mitama::static_string<S>::char_type>>
+{
+  auto format(mitama::static_string<S>, format_context& ctx) {
+    return formatter<const typename mitama::static_string<S>::char_type*>::format(mitama::static_string<S>::value, ctx);
+  }
+};
 
 namespace mitama {
   template <class T> struct is_static_str : std::false_type {};
