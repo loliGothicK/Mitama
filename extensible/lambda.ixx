@@ -66,7 +66,6 @@ export namespace mitama {
   MITAMA_LAMBDA_UNARY_FUNCTION(std::negate<>, -)
 
   // relational operators
-
   MITAMA_LAMBDA_BINARY_FUNCTION(std::equal_to<>, == )
   MITAMA_LAMBDA_BINARY_FUNCTION(std::not_equal_to<>, != )
   MITAMA_LAMBDA_BINARY_FUNCTION(std::greater<>, > )

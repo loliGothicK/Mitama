@@ -59,14 +59,14 @@ export namespace mitama::inspect {
           [&, rx = std::move(rx)]() mutable -> report_type
           {
             report_type report = {};
-            while (rx.next()) {
+            do {
               if (auto messages = rx.recv(); messages) {
                 for (auto msg : messages.unwrap()) {
                   report.push_back(msg);
                 }
                 break;
               }
-            }
+            } while (rx.next());
             return report;
           }));
       return *this;
