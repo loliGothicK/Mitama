@@ -7,7 +7,7 @@ module;
 export module Mitama.Functional.Extensible.Match;
 export import Mitama.Functional.Extensible.Lambda;
 import Mitama.Data.Extensible.Record;
-import Mitama.Concepts.Extensible;
+import Mitama.Base.Concepts.DataKind;
 
 export namespace mitama {
   template <class T>

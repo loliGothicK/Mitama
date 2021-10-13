@@ -1,6 +1,6 @@
 module;
 
-export module Mitama.Maybe.def:nothing;
+export module Mitama.Data.Maybe.def:nothing;
 
 namespace mitama {
   // factory class

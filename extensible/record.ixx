@@ -8,27 +8,31 @@ export import Mitama.Data.Extensible.Named;
 export import Mitama.Data.Extensible.StaticString;
 export module Mitama.Data.Extensible.Record;
 import Mitama.Data.Extensible.TypeList;
-import Mitama.Concepts.Extensible;
+import Mitama.Base.Concepts.DataKind;
 import Mitama.Functional.Extensible;
 import Mitama.Utility.Extensible;
 import :Internal;
 
+namespace mitama {
+  template <class, class = void>
+  struct named_as_impl: std::false_type {};
+
+  template <class _, auto Tag, class Expected>
+    requires (named<Tag, _>::str == Expected::str)
+  struct named_as_impl<named<Tag, _>, Expected>
+    : std::true_type {};
+
+  template <class _, auto Any>
+  struct named_as_impl<named<Any, _>, void>
+    : std::true_type {};
+}
+
 export namespace mitama:: inline where {
   template <class T, static_string Tag>
-  concept named_as = [] {
-    return overloaded{
-      [](...) { return false; },
-      []<class _>(std::type_identity<named<Tag, _>>) { return true; }
-    }(std::type_identity<std::remove_cvref_t<std::remove_cvref_t<T>>>());
-  }();
+  concept named_as = named_as_impl<T, named<Tag>>::value;
 
   template <class T>
-  concept named_any = [] {
-    return overloaded{
-      [](...) { return false; },
-      []<auto Any, class _>(std::type_identity<named<Any, _>>) { return true; }
-    }(std::type_identity<std::remove_cvref_t<std::remove_cvref_t<T>>>());
-  }();
+  concept named_any = named_as_impl<T, void>::value;
 }
 
 // Concepts for Extensible Records

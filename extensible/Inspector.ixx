@@ -15,13 +15,13 @@ module;
 export module Mitama.Inspector;
 export import Mitama.Data.Extensible.Record;
 import Mitama.Data.Extensible.StaticString;
-import Mitama.Concepts.Extensible;
+import Mitama.Base.Concepts.DataKind;
 import Mitama.Utility.Extensible.Indoc;
 import Mitama.Async.Generator;
 import Mitama.Async.OneShot;
-import Mitama.Maybe;
-import Mitama.Result;
-import Mitama.Result.IO;
+import Mitama.Data.Maybe;
+import Mitama.Data.Result;
+import Mitama.Data.Result.IO;
 
 export namespace mitama::inspect {
   template <fixed_string Name>

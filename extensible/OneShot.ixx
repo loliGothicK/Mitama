@@ -5,7 +5,7 @@ module;
 #include <iostream>
 export module Mitama.Async.OneShot;
 import Mitama.Async.Generator;
-import Mitama.Maybe;
+import Mitama.Data.Maybe;
 
 namespace mitama::async::oneshot {
   template <class T>

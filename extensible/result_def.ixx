@@ -2,14 +2,20 @@ module;
 
 #include <variant>
 #include <concepts>
+#include <utility>
 #include <source_location>
 
-export module Mitama.Result.def;
+export module Mitama.Data.Result.def;
 export import :success;
 export import :failure;
-import Mitama.Panic;
+import Mitama.Data.Panic;
 
 using namespace std;
+
+namespace mitama::customisation_point::for_result {
+  template <class T>
+  inline constexpr auto _transpose(T&& res) { return transpose(std::forward<T>(res)); }
+}
 
 namespace mitama {
   export template <destructible T = monostate, destructible E = monostate>
@@ -34,7 +40,7 @@ namespace mitama {
       return holds_alternative<success_t<T>>(storage);
     }
 
-    constexpr success_type& unwrap(source_location info = source_location::current())& {
+    constexpr success_type& unwrap(source_location info = source_location::current()) & {
       if (bool(*this)) {
         return get<success_t<T>>(storage).get();
       }
@@ -46,28 +52,40 @@ namespace mitama {
         };
       }
     }
-    constexpr const success_type& unwrap() const& {
+    constexpr success_type& unwrap(source_location info = source_location::current()) const& {
       if (bool(*this)) {
         return get<success_t<T>>(storage).get();
       }
       else {
-        throw runtime_panic{ "unwrap with failure value." };
+        throw runtime_panic{
+          "unwrap with failure value. [in {}, line: {}]",
+          info.function_name(),
+          info.line()
+        };
       }
     }
-    constexpr success_type&& unwrap() && {
+    constexpr success_type& unwrap(source_location info = source_location::current()) && {
       if (bool(*this)) {
         return move(get<success_t<T>>(storage).get());
       }
       else {
-        throw runtime_panic{ "unwrap with failure value." };
+        throw runtime_panic{
+          "unwrap with failure value. [in {}, line: {}]",
+          info.function_name(),
+          info.line()
+        };
       }
     }
-    constexpr const success_type&& unwrap() const&& {
+    constexpr success_type& unwrap(source_location info = source_location::current()) const&& {
       if (bool(*this)) {
         return move(get<success_t<T>>(storage).get());
       }
       else {
-        throw runtime_panic{ "unwrap with failure value." };
+        throw runtime_panic{
+          "unwrap with failure value. [in {}, line: {}]",
+          info.function_name(),
+          info.line()
+        };
       }
     }
 
@@ -102,6 +120,10 @@ namespace mitama {
       else {
         throw runtime_panic{ "unwrap_err with success value." };
       }
+    }
+
+    constexpr auto transpose() const {
+      return customisation_point::for_result::_transpose(*this);
     }
   };
 

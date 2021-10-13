@@ -6,7 +6,7 @@ module;
 #include <string_view>
 #include <format>
 
-export module Mitama.Panic;
+export module Mitama.Data.Panic;
 
 namespace mitama {
 

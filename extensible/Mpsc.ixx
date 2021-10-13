@@ -12,7 +12,7 @@ module;
 #include <mutex>
 export module Mitama.Async.Mpsc;
 export import Mitama.Async.Generator;
-import Mitama.Maybe;
+import Mitama.Data.Maybe;
 
 namespace mitama::async::mpsc {
   template <class T>

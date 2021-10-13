@@ -2,7 +2,7 @@ module;
 
 #include <concepts>
 
-export module Mitama.Result.def:failure;
+export module Mitama.Data.Result.def:failure;
 
 using namespace std;
 

@@ -1,17 +1,17 @@
 module;
 
+#include <type_traits>
+#include <utility>
 #include <concepts>
 #include <variant>
 
-export module Mitama.Result.def:success;
+export module Mitama.Data.Result.def:success;
 
-using namespace std;
-
-namespace mitama {
-  export template <destructible T>
+export namespace mitama {
+  template <std::destructible T>
   class success_t {
     T value;
-    using value_type = remove_cvref_t<T>;
+    using value_type = std::remove_cvref_t<T>;
   public:
     template <class U>
     constexpr success_t(U&& value) noexcept : value{ std::forward<U>(value) } {}
@@ -22,10 +22,10 @@ namespace mitama {
     value_type const&& get() const&& { return std::move(value); }
   };
 
-  export template <destructible T>
+  template <std::destructible T>
   class success_t<T&> {
-    reference_wrapper<T> ref;
-    using value_type = remove_cvref_t<T>;
+    std::reference_wrapper<T> ref;
+    using value_type = std::remove_cvref_t<T>;
   public:
     template <class U>
     constexpr success_t(U& value) noexcept : ref{ value } {}
@@ -36,11 +36,11 @@ namespace mitama {
     value_type const&& get() const&& { return std::move(ref.get()); }
   };
 
-  export template <class T>
+  template <class T>
   success_t(T&&) -> success_t<T>;
 
-  export inline constexpr auto success = []<class T = std::monostate>(T&& from = {}) {
-    return success_t{ std::forward<T>(from) };
+  inline constexpr auto success = []<class T = std::monostate>(T&& from = std::monostate{}) {
+    return success_t{ static_cast<T&&>(from) };
   };
 
 } //! namespace mitama

@@ -1,7 +1,7 @@
 module;
-#include <boost/hana/functional/overload.hpp>
-#include <functional>
-export module Mitama.Concepts.Extensible;
+#include <type_traits>
+#include <ranges>
+export module Mitama.Base.Concepts.DataKind;
 
 namespace mitama {
   template <template <class...> class, class>
@@ -19,4 +19,10 @@ export namespace mitama:: inline where {
 
   template <class T, class Of>
   concept kind = Of:: template value<T>;
+}
+
+export namespace mitama:: inline where{
+  template <class R, class E>
+  concept range_of = std::ranges::range<R>
+                  && std::convertible_to<std::ranges::range_value_t<R>, E>;
 }

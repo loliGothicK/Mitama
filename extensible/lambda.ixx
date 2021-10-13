@@ -2,7 +2,7 @@ module;
 #include <functional>
 export module Mitama.Functional.Extensible.Lambda;
 export import Mitama.Data.Extensible.Record;
-export import Mitama.Concepts.Extensible;
+export import Mitama.Base.Concepts.DataKind;
 
 #define MITAMA_LAMBDA_BINARY_FUNCTION(FUNCTOR, OPERATOR)                    \
   template <class A, class B>                                               \

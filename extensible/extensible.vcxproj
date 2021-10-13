@@ -143,25 +143,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Applicative.ixx" />
     <ClCompile Include="display.ixx" />
     <ClCompile Include="failure.ixx" />
-    <ClCompile Include="formattable.ixx" />
     <ClCompile Include="Generator.ixx" />
+    <ClCompile Include="Group.ixx" />
+    <ClCompile Include="has_xxx.ixx" />
     <ClCompile Include="indoc.ixx" />
+    <ClCompile Include="infix.ixx" />
     <ClCompile Include="Inspector.ixx" />
     <ClCompile Include="just.ixx" />
     <ClCompile Include="lambda.ixx" />
+    <ClCompile Include="Magma.ixx" />
     <ClCompile Include="match_expression.ixx" />
     <ClCompile Include="concepts.ixx" />
     <ClCompile Include="maybe.ixx" />
     <ClCompile Include="maybe_def.ixx" />
     <ClCompile Include="maybe_io.ixx" />
+    <ClCompile Include="Functor.ixx" />
+    <ClCompile Include="Monad.ixx" />
+    <ClCompile Include="Monoid.ixx" />
     <ClCompile Include="Mpsc.ixx" />
     <ClCompile Include="nothing.ixx" />
     <ClCompile Include="OneShot.ixx" />
     <ClCompile Include="panic.ixx" />
-    <ClCompile Include="pipe.ixx" />
-    <ClCompile Include="prelude.ixx" />
     <ClCompile Include="functional.ixx" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="named.ixx" />
@@ -169,14 +174,13 @@
     <ClCompile Include="record_internal.ixx" />
     <ClCompile Include="result.ixx" />
     <ClCompile Include="result_def.ixx" />
-    <ClCompile Include="result_functional.ixx" />
     <ClCompile Include="result_io.ixx" />
+    <ClCompile Include="SemiGroup.ixx" />
     <ClCompile Include="static_string.ixx" />
     <ClCompile Include="storage.ixx" />
     <ClCompile Include="success.ixx" />
-    <ClCompile Include="transpose.ixx" />
+    <ClCompile Include="Text.ixx" />
     <ClCompile Include="type_list.ixx" />
-    <ClCompile Include="unwrap.ixx" />
     <ClCompile Include="utility.ixx" />
   </ItemGroup>
   <ItemGroup>

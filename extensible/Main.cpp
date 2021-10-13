@@ -8,6 +8,8 @@
 import Mitama.Data.Extensible.Record;
 import Mitama.Functional.Extensible.Match;
 import Mitama.Functional.Extensible.Lambda;
+import Mitama.Base.Data.Display;
+import Mitama.Data.Maybe;
 import Mitama.Inspector;
 #include <iostream>
 #include <format>
@@ -22,6 +24,10 @@ using namespace std::literals;
 
 int main() {
   using mitama::as;
+
+  std::cout << std::format("{}\n", std::tuple{1, 2, 3});
+  std::cout << std::format("{}\n", std::vector{1, 2, 3});
+
   namespace inspect = mitama::inspect;
   {
     inspect::test<"Mitama.Data.Extensible.Record">()

@@ -8,7 +8,7 @@ module;
 #include <type_traits>
 #include <utility>
 export module Mitama.Data.Extensible.Named;
-import Mitama.Concepts.Extensible;
+import Mitama.Base.Concepts.DataKind;
 import Mitama.Functional.Extensible;
 import Mitama.Utility.Extensible;
 import Mitama.Data.Extensible.StaticString;

@@ -5,11 +5,16 @@ module;
 #include <type_traits>
 #include <iostream>
 
-export module Mitama.Maybe.def;
+export module Mitama.Data.Maybe.def;
 export import :just;
 export import :nothing;
-import Mitama.Panic;
+import Mitama.Data.Panic;
 using namespace std;
+
+namespace mitama::customisation_point::for_maybe {
+  template <class T>
+  inline constexpr auto _transpose(T&& res) { return transpose(std::forward<T>(res)); }
+}
 
 namespace mitama {
   // class maybe
@@ -45,7 +50,7 @@ namespace mitama {
 
     constexpr value_type& unwrap() & {
       if (bool(*this)) {
-        return get<just_t<T>>(storage).value;
+        return get<just_t<T>>(storage).get();
       }
       else {
         throw runtime_panic{ "unwrap with nothing value." };
@@ -53,7 +58,7 @@ namespace mitama {
     }
     constexpr const value_type& unwrap() const& {
       if (bool(*this)) {
-        return get<just_t<T>>(storage).value;
+        return get<just_t<T>>(storage).get();
       }
       else {
         throw runtime_panic{ "unwrap with nothing value." };
@@ -61,7 +66,7 @@ namespace mitama {
     }
     constexpr value_type&& unwrap() && {
       if (bool(*this)) {
-        return get<just_t<T>>(storage).value;
+        return get<just_t<T>>(storage).get();
       }
       else {
         throw runtime_panic{ "unwrap with nothing value." };
@@ -69,13 +74,16 @@ namespace mitama {
     }
     constexpr const value_type&& unwrap() const&& {
       if (bool(*this)) {
-        return get<just_t<T>>(storage).value;
+        return get<just_t<T>>(storage).get();
       }
       else {
         throw runtime_panic{ "unwrap with nothing value." };
       }
     }
 
+    constexpr auto transpose() const {
+      return customisation_point::for_maybe::_transpose(*this);
+    }
   };
 
   // deduction guides

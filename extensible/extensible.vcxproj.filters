@@ -28,25 +28,34 @@
     <Filter Include="Header Files\Extensible\Utility">
       <UniqueIdentifier>{f0e7fc6b-3c5f-4366-b702-d2d79d733237}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Extensible\Concepts">
-      <UniqueIdentifier>{ed3deac6-077f-431a-aaf2-63ce4b555816}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Inspector">
       <UniqueIdentifier>{3d5eb96b-691e-44d5-b8e3-04e39e368ab1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Async">
       <UniqueIdentifier>{215c8f8f-c733-4412-9c0c-99e658ca1ff1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Extensible\Data\Result">
+    <Filter Include="Header Files\Base">
+      <UniqueIdentifier>{368e921c-93e7-4b10-835c-678354006de3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Base\Control">
+      <UniqueIdentifier>{7c8c7768-5238-42cc-8fe6-fbe43122877a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Base\Functional">
+      <UniqueIdentifier>{0c65b34f-34ae-466a-b9e9-13179dc14112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Base\Data">
+      <UniqueIdentifier>{f0bb67cb-444c-43b3-97b9-1a7ba847dd61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Base\Concepts">
+      <UniqueIdentifier>{ed3deac6-077f-431a-aaf2-63ce4b555816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Base\Data\Result">
       <UniqueIdentifier>{4ad079cc-d369-4bc3-a62d-24a3db83d1ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="prelude.ixx">
-      <Filter>Header Files\Extensible</Filter>
     </ClCompile>
     <ClCompile Include="named.ixx">
       <Filter>Header Files\Extensible\Data</Filter>
@@ -73,7 +82,7 @@
       <Filter>Header Files\Extensible\Utility</Filter>
     </ClCompile>
     <ClCompile Include="Concepts.ixx">
-      <Filter>Header Files\Extensible\Concepts</Filter>
+      <Filter>Header Files\Base\Concepts</Filter>
     </ClCompile>
     <ClCompile Include="lambda.ixx">
       <Filter>Header Files\Extensible\Functional</Filter>
@@ -93,59 +102,74 @@
     <ClCompile Include="Mpsc.ixx">
       <Filter>Header Files\Async</Filter>
     </ClCompile>
-    <ClCompile Include="display.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
-    </ClCompile>
     <ClCompile Include="failure.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
-    </ClCompile>
-    <ClCompile Include="formattable.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="just.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="maybe.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="maybe_def.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="maybe_io.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="nothing.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="panic.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
-    </ClCompile>
-    <ClCompile Include="pipe.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="result.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="result_def.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
-    </ClCompile>
-    <ClCompile Include="result_functional.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="result_io.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="success.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
-    </ClCompile>
-    <ClCompile Include="transpose.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
-    </ClCompile>
-    <ClCompile Include="unwrap.ixx">
-      <Filter>Header Files\Extensible\Data\Result</Filter>
+      <Filter>Header Files\Base\Data\Result</Filter>
     </ClCompile>
     <ClCompile Include="OneShot.ixx">
       <Filter>Header Files\Async</Filter>
+    </ClCompile>
+    <ClCompile Include="Functor.ixx">
+      <Filter>Header Files\Base\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="infix.ixx">
+      <Filter>Header Files\Base\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="Applicative.ixx">
+      <Filter>Header Files\Base\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Monad.ixx">
+      <Filter>Header Files\Base\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Magma.ixx">
+      <Filter>Header Files\Base\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="SemiGroup.ixx">
+      <Filter>Header Files\Base\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Monoid.ixx">
+      <Filter>Header Files\Base\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Group.ixx">
+      <Filter>Header Files\Base\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="has_xxx.ixx">
+      <Filter>Header Files\Base\Concepts</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.ixx">
+      <Filter>Header Files\Base\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="display.ixx">
+      <Filter>Header Files\Base\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
